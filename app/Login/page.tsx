@@ -3,13 +3,51 @@
 import image from "../image/Koy1.jpg";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { input } from "../style";
+import { Poppins } from "next/font/google";
+
+
+  const poppins = Poppins({
+    subsets: ["latin"],
+    weight: ["400", "700"],
+    variable: "--font-poppins",
+  });
 
 export default function SignIn() {
+
+
+
+  const [form, setForm] = useState({ Name: "", password: "" });
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch("http://localhost:3222/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem("token", data.access_token);
+      router.push("/home"); // atau halaman lain
+    } else {
+      alert(data.message || "Login gagal");
+    }
+  };
   return (
-    <section className="min-h-screen flex items-center justify-center font-poppins bg-sky-200 p-4">
+    <div className={poppins.className}>
+    <section className="min-h-screen flex items-center justify-center bg-sky-200 p-4">
       <div className="flex flex-col xl:flex-row shadow-2xl w-full max-w-6xl rounded-2xl overflow-hidden">
         {/* FORM */}
-        <div className="flex flex-col items-center justify-center text-center p-8 md:p-12 xl:p-20 gap-8 bg-white w-full xl:w-1/2">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col items-center justify-center text-center p-8 md:p-12 xl:p-20 gap-8 bg-white w-full xl:w-1/2"
+        >
           <h1 className="text-4xl md:text-5xl font-bold">Sign In</h1>
 
           {/* ... input dan tombol ... */}
@@ -18,7 +56,9 @@ export default function SignIn() {
             <input
               type="text"
               placeholder="Input Username"
-              className="placeholder:text-base md:placeholder:text-lg w-full border-b rounded-md border-gray-400 bg-transparent focus:outline-none focus:border-blue-500 transition duration-300 py-2"
+              onChange={(e) => setForm({ ...form, Name: e.target.value })}
+              name="Name"
+              className={input}
             />
           </div>
 
@@ -27,11 +67,13 @@ export default function SignIn() {
             <input
               type="password"
               placeholder="Input Password"
-              className="placeholder:text-base md:placeholder:text-lg w-full border-b border-gray-400 bg-transparent focus:outline-none focus:border-blue-500 transition duration-300 py-2"
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              name="password"
+              className={input}
             />
           </div>
 
-          <button className="px-8 py-2 text-lg md:text-2xl rounded-md border-2 bg-sky-600 hover:bg-slate-100 hover:border-sky-600 transition duration-300 ease-in-out">
+          <button type="submit" className="bg-[#286699] border-none text-white font-semibold py-3 rounded-md hover:bg-[#194E7A] transition w-full">
             Login
           </button>
 
@@ -41,7 +83,7 @@ export default function SignIn() {
               Register Now!
             </Link>
           </p>
-        </div>
+        </form>
 
         {/*IMAGE */}
         <div className="relative hidden xl:block w-full xl:w-1/2">
@@ -54,5 +96,6 @@ export default function SignIn() {
         </div>
       </div>
     </section>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import Image from "next/image";
 import { use } from "react";
@@ -17,6 +17,8 @@ import dawg1 from '../image/Dawg1.jpg'
 import dawg2 from '../image/Dawg2.jpg'
 import dawg3 from '../image/Dawg3.jpg'
 import dawg4 from '../image/Dawg4.jpg'
+import { useRouter } from 'next/navigation';
+import router from "next/router";
 
 const images = [doc, dawgHero, docc]
 
@@ -28,8 +30,17 @@ type Product = {
   price: number
 }
 
+type User = {
+  id: number;
+  Name: string;
+  email: string;
+  roles: string[];
+};
 
+  const [user, setUser] = useState<User | null>(null);
   const [data, setData] = useState<Product[]>([])
+  const router = useRouter();
+
     useEffect(() => {
       fetch('http://localhost:3222/product',{
         method: 'GET',
@@ -42,6 +53,29 @@ type Product = {
         })
         .catch(err => console.error('Error fetching product:', err))
     }, [])
+
+    // pages/dashboard.tsx
+    useEffect(() => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/Login");
+        return;
+      }
+
+      fetch("http://localhost:3222/auth/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Unauthorized");
+          return res.json();
+        })
+        .then((data) => setUser(data))
+        .catch(() => {
+          localStorage.removeItem("token");
+          router.push("/Login");
+        });
+    }, []);
+
   // Data produk contoh
   const products = [
     {
@@ -56,8 +90,8 @@ type Product = {
     },
     {
       id: 2,
-      name: "Whiskas",
-      price: "Rp 20.000",
+      name: "NaviCat",
+      price: "Rp 60.000",
       image: "/image/W1.jpg",
       rating: 4.8,
       reviews: 234,
@@ -66,7 +100,7 @@ type Product = {
     },
     {
       id: 3,
-      name: "Whiskas",
+      name: "Porplan",
       price: "Rp 20.000",
       image: "/image/W1.jpg",
       rating: 4.8,
@@ -76,7 +110,7 @@ type Product = {
     },
     {
       id: 4,
-      name: "Whiskas",
+      name: "Golden",
       price: "Rp 20.000",
       image: "/image/W1.jpg",
       rating: 4.8,
@@ -101,7 +135,7 @@ return (
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold">Welcome To Cemoet Pets</h1>
-          <p className="text-gray-700">Hello, Antoni Erwin</p>
+          <p className="text-gray-700">{user?.Name}</p>
         </div>
 
         {/* Hero Section */}
@@ -201,8 +235,8 @@ return (
                 height={100}
                 className="mx-auto mb-2"
               />
-              <h4 className="font-bold">{product.name}</h4>
-              <p className="text-lg font-semibold mt-2">{product.price}</p>
+              <h4 className="font-bold text-[#373737]">{product.name}</h4>
+              <p className="text-lg font-semibold mt-2 text-[#373737]">{product.price}</p>
               <div className="mt-4">
                 <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
                   Buy Now
@@ -229,37 +263,37 @@ return (
             <h2 className="text-white text-3xl font-bold mb-6 text-center">Checkup Form</h2>
 
             <div className="flex justify-center gap-3 mb-6">
-              <button className="bg-white text-black font-semibold px-5 py-2 rounded-full border border-black">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full border border-[#373737]">
                 Normal Wash
               </button>
-              <button className="bg-white text-black font-semibold px-5 py-2 rounded-full border border-black">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full border border-[#373737]">
                 Fungal Wash
               </button>
-              <button className="bg-white text-black font-semibold px-5 py-2 rounded-full border border-black">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full border border-[#373737]">
                 Fleas Wash
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-white scrollbar-track-transparent">
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow-md text-sm leading-tight">
-                <p className="font-semibold">Anti Fungal Wash</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow-md text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold">Anti Fungal Wash{'\n'}+Degreaser</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow-md text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold">Anti Fungal Wash{'\n'}+Sebazol</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Sebazol</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow-md text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold">Anti Fungal Wash{'\n'}+Degreaser{'\n'}+Sebazol</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser{'\n'}+Sebazol</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
             </div>
 
-              <Link href="/forms/clinic" className="flex text-white font-bold text-xl self-end no-underline pt-6">
+              <Link href="/forms/clinic" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
                 Book Now <ArrowRight className="mr-2" /> 
               </Link>
           </div>
@@ -317,13 +351,13 @@ return (
 
             {/* Tabs */}
             <div className="flex justify-center gap-3 mb-6">
-              <button className="bg-white text-black font-semibold px-5 py-2 rounded-full shadow">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
                 Normal Wash
               </button>
-              <button className="bg-white text-black font-semibold px-5 py-2 rounded-full shadow">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
                 Fungal Wash
               </button>
-              <button className="bg-white text-black font-semibold px-5 py-2 rounded-full shadow">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
                 Fleas Wash
               </button>
             </div>
@@ -331,25 +365,25 @@ return (
             {/* List Items */}
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-white scrollbar-track-transparent">
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight">
-                <p className="font-semibold">Anti Fungal Wash</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold">Anti Fungal Wash{'\n'}+Degreaser</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold">Anti Fungal Wash{'\n'}+Sebazol</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Sebazol</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold">Anti Fungal Wash{'\n'}+Degreaser{'\n'}+Sebazol</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser{'\n'}+Sebazol</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
             </div>
 
             {/* BOOK NOW */}
-                  <Link href="/home" className="flex text-white font-bold text-xl self-end no-underline pt-6">
+                  <Link href="/home" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
                     View All Product <ArrowRight className="mr-2" /> 
                   </Link>
           </div>
@@ -381,13 +415,13 @@ return (
 
             {/* Tabs */}
             <div className="flex justify-center gap-3 mb-6">
-              <button className="bg-white text-black font-semibold px-5 py-2 rounded-full shadow">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
                 Normal Wash
               </button>
-              <button className="bg-white text-black font-semibold px-5 py-2 rounded-full shadow">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
                 Fungal Wash
               </button>
-              <button className="bg-white text-black font-semibold px-5 py-2 rounded-full shadow">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
                 Fleas Wash
               </button>
             </div>
@@ -395,25 +429,25 @@ return (
             {/* List Items */}
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-white scrollbar-track-transparent">
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight">
-                <p className="font-semibold">Anti Fungal Wash</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold">Anti Fungal Wash{'\n'}+Degreaser</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold">Anti Fungal Wash{'\n'}+Sebazol</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Sebazol</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold">Anti Fungal Wash{'\n'}+Degreaser{'\n'}+Sebazol</p>
-                <p className="font-bold">75K</p>
+                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser{'\n'}+Sebazol</p>
+                <p className="font-bold text-[#373737]">75K</p>
               </div>
             </div>
 
             {/* BOOK NOW */}
-                  <Link href="/home" className="flex text-white font-bold text-xl self-end no-underline pt-6">
+                  <Link href="/home" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
                     View All Product <ArrowRight className="mr-2" /> 
                   </Link>
           </div>
@@ -423,13 +457,13 @@ return (
         <footer className="bg-white shadow-xl rounded-2xl p-14 mt-40 max-w-7xl mx-auto pb-36">
           <div className="flex flex-col md:flex-row justify-between items-start gap-8">
             {/* Left */}
-            <div className="flex-1 text-black space-y-2">
-              <h1 className="text-3xl font-bold">Cemoet Pets</h1>
-              <p className="font-semibold">PT. Dignitas Akademi</p>
-              <p className="text-sm">
+            <div className="flex-1 text-[#373737] space-y-2">
+              <h1 className="text-3xl font-bold text-[#373737]">Cemoet Pets</h1>
+              <p className="font-semibold text-[#373737]">PT. Dignitas Akademi</p>
+              <p className="text-sm text-[#373737]">
                 Jl. Bungur Raya No.20, Kukusan, Kecamatan Beji, Kota Depok, Jawa Barat 16425
               </p>
-              <p className="text-sm">
+              <p className="text-sm text-[#373737]">
                 Pusat Kebutuhan Hewan Peliharaan Terlengkap, Terbesar,
                 <br /> & Terpercaya No. 1 di Indonesia
               </p>
@@ -438,11 +472,11 @@ return (
             {/* Right */}
             <div className="flex-1 text-right flex flex-col items-end gap-3">
               <div className="flex gap-6 font-semibold">
-                <a href="#" className="hover:underline no-underline">Home</a>
-                <a href="#" className="hover:underline no-underline">Products</a>
-                <a href="#" className="hover:underline no-underline">Doctors</a>
-                <a href="#" className="hover:underline no-underline">Grooming</a>
-                <a href="#" className="hover:underline no-underline">Hotel</a>
+                <a href="#" className="hover:underline no-underline text-[#373737]">Home</a>
+                <a href="#" className="hover:underline no-underline text-[#373737]">Products</a>
+                <a href="#" className="hover:underline no-underline text-[#373737]">Doctors</a>
+                <a href="#" className="hover:underline no-underline text-[#373737]">Grooming</a>
+                <a href="#" className="hover:underline no-underline text-[#373737]">Hotel</a>
               </div>
               <p className="text-xs max-w-sm text-gray-600 text-right mt-2">
                 ©2025 Cemoet Corporation. Cemoet, the cemoet healthy pet shop are among our registered and unregistered trademarks in the IDN and other countries.
@@ -454,4 +488,5 @@ return (
     </div>
   )
 }
+
 
