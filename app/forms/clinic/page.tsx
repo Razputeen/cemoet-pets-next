@@ -5,6 +5,8 @@ import { Poppins } from 'next/font/google'
 import Link from "next/link";
 import Navbar from "../../Navbar/page";
 import { usedService, unusedService, input } from "../../style";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -13,6 +15,37 @@ const poppins = Poppins({
 })
 
 export default function AppointmentForm() {
+  type User = {
+  id: number;
+  Name: string;
+  email: string;
+  roles: string[];
+};
+
+    const [user, setUser] = useState<User | null>(null);
+    const router = useRouter();
+
+      useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          router.push("/Login");
+          return;
+        }
+  
+        fetch("http://localhost:3222/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error("Unauthorized");
+            return res.json();
+          })
+          .then((data) => setUser(data))
+          .catch(() => {
+            localStorage.removeItem("token");
+            router.push("/Login");
+          });
+      }, []);
+      
   return (
     <div className={poppins.className}>
       <Navbar />
@@ -59,7 +92,7 @@ export default function AppointmentForm() {
                 <label htmlFor="ownerName" className="text-sm font-semibold block mb-1">
                   Owner Name
                 </label>
-                <input type="text" id="ownerName" placeholder="Owner Name" className={input} />
+                <input type="text" id="ownerName" placeholder={user?.Name} className={input} />
               </div>
 
               <div>
@@ -73,7 +106,7 @@ export default function AppointmentForm() {
                 <label htmlFor="emailAddress" className="text-sm font-semibold block mb-1">
                   Email Address
                 </label>
-                <input type="email" id="emailAddress" placeholder="Email Address" className={input} />
+                <input type="email" id="emailAddress" placeholder={user?.email} className={input} />
               </div>
 
               <div>
