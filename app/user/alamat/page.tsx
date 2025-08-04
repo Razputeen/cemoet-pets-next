@@ -1,4 +1,4 @@
-import Navbar from "../../../Navbar/page";
+import Navbar from "../../components/Navbar/page";
 import { Poppins } from 'next/font/google';
 import Image from "next/image";
 import  Link  from "next/link";
@@ -9,6 +9,18 @@ const poppins = Poppins({
   weight: ['400', '700'], // Adjust weights as needed
   variable: '--font-poppins', // Define a CSS variable name for Tailwind
 });
+
+const alamat = {
+  id: 1,
+  street: "Jl. Kebon Jeruk",
+  city: "Jakarta",
+  province: "DKI Jakarta",
+  postalCode: "12345",
+  country: "Indonesia",
+  penerima: "John Doe",
+  noHp: "08123456789",
+  
+}
 
 export default function Alamat() {
     return (

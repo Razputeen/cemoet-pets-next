@@ -1,8 +1,13 @@
-import Navbar from "../../../Navbar/page";
+"use client";
+
+import Navbar from "../../components/Navbar/page";
 import { Poppins } from 'next/font/google';
 import Image from "next/image";
 import  Link  from "next/link";
-import Cemo from "../../../image/Cemow.jpg";
+import Cemo from "../../image/Cemow.jpg";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import LogoutButton from "#/app/components/logoutButton";
 
 // Configure Poppins. You can specify weights and subsets.
 const poppins = Poppins({
@@ -12,6 +17,40 @@ const poppins = Poppins({
 });
 
 export default function Profile() {
+
+  type User = {
+  id: number;
+  Name: string;
+  email: string;
+  roles: string[];
+  reserveGroom: string[];
+};
+
+    const [user, setUser] = useState<User | null>(null);
+    const router = useRouter();
+
+      useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          router.push("/Login");
+          return;
+        }
+  
+        fetch("http://localhost:3222/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error("Unauthorized");
+            return res.json();
+          })
+          .then((data) => setUser(data))
+          .catch(() => {
+            localStorage.removeItem("token");
+            router.push("/Login");
+          });
+      }, []);
+      
+
     return (
       <>
         <body className={poppins.className}>
@@ -38,11 +77,12 @@ export default function Profile() {
             height={100}
             className="rounded-full"
           />
-          <h2 className="mt-4 font-semibold text-lg">Anthony Simorah</h2>
+          <h2 className="mt-4 font-semibold text-lg">{user?.Name}</h2>
           <p className="text-sm text-gray-500 mb-4">Customer</p>
           <button className="bg-blue-800 text-white px-4 py-2 rounded-lg hover:bg-blue-900 transition">
             Edit Profile
           </button>
+          <LogoutButton />
         </div>
       </div>
 
@@ -52,7 +92,7 @@ export default function Profile() {
           <h3 className="text-lg font-semibold mb-4">About Me</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
             <p>
-              <strong>Name :</strong> Anthony Simorah
+              <strong>Name :</strong> {user?.Name}
             </p>
             <p>
               <strong>Birth Date :</strong> 28-02-2008
@@ -64,13 +104,19 @@ export default function Profile() {
             <p>
               <strong>Email :</strong>{" "}
               <span className="text-blue-700 font-medium">
-                Moralia92@gmail.com
+                {user?.email}
               </span>
             </p>
             <p>
               <strong>Phone Number :</strong>{" "}
               <span className="text-blue-700 font-medium">
                 +6281213203831
+              </span>
+            </p>
+            <p>
+              <strong>Role :</strong>{" "}
+              <span className="text-blue-700 font-medium">
+                {user?.roles}
               </span>
             </p>
           </div>

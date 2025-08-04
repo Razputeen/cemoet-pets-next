@@ -15,7 +15,7 @@ const poppins = Poppins({
 
 export default function SignIn() {
 
-  const [form, setForm] = useState({ Name: "", email: "", password: "" });
+  const [form, setForm] = useState({ Name: "", email: "", password: "", phoneNum: "" });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +67,16 @@ export default function SignIn() {
         />
       </div>
 
+      <div className="flex flex-col text-lg md:text-2xl text-left gap-1 w-full">
+        <span>No. Phone</span>
+        <input
+          type="text"
+          placeholder="Input Phone Number"
+          onChange={e => setForm({ ...form, phoneNum: e.target.value })}
+          className={input}
+        />
+      </div>
+      
       <div className="flex flex-col text-lg md:text-2xl text-left gap-1 w-full">
         <span>Password</span>
         <input

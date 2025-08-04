@@ -4,7 +4,7 @@ import Image from "next/image";
 import { use } from "react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Leaf, ShoppingBag, Stethoscope } from "lucide-react";
+import { ArrowLeft, ArrowRight, Leaf, Package, ReceiptText, ShoppingBag, ShoppingCart, Stethoscope, User, BookText } from "lucide-react";
 import dawgHero from "../image/dawg.png";
 import proplan from "../image/proplan.png";
 import CAds from "../image/ComponentAds1.png";
@@ -31,15 +31,60 @@ type Product = {
 }
 
 type User = {
-  id: number;
+  sub: string;
   Name: string;
   email: string;
   roles: string[];
 };
 
+type Doctor = {
+  id: number;
+  name: string;
+  speciality: string;
+  email: string;
+  noTelp: string;
+  description: string;
+}
+
+type Grooming = {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  specification: string;
+}
+
   const [user, setUser] = useState<User | null>(null);
   const [data, setData] = useState<Product[]>([])
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [grooming, setGrooming] = useState<Grooming[]>([])
   const router = useRouter();
+
+    useEffect(() => {
+      fetch('http://localhost:3222/doctors',{
+        method: 'GET',
+        cache: 'no-store'
+      } )
+        .then(res => res.json())
+        .then(json => {
+          console.log("DATA DARI SERVER:", json)
+          setDoctors(json.rows || json) // fallback jika rows tidak ada
+        })
+        .catch(err => console.error('Error fetching product:', err))
+    }, [])
+
+      useEffect(() => {
+      fetch('http://localhost:3222/grooms',{
+        method: 'GET',
+        cache: 'no-store'
+      } )
+        .then(res => res.json())
+        .then(json => {
+          console.log("DATA DARI SERVER:", json)
+          setGrooming(json.rows || json) // fallback jika rows tidak ada
+        })
+        .catch(err => console.error('Error fetching product:', err))
+    }, [])
 
     useEffect(() => {
       fetch('http://localhost:3222/product',{
@@ -133,9 +178,30 @@ return (
       <div className="max-w-screen-xl mx-auto bg-white rounded-3xl shadow-md p-6">
 
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Welcome To Cemoet Pets</h1>
-          <p className="text-gray-700">{user?.Name}</p>
+        <div className="mb-6 flex justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Welcome To Cemoet Pets</h1>
+            <p className="text-gray-700">{user?.Name}</p>
+          </div>
+          <div className="flex items-center space-x-4 pr-4">
+            {/* Ikon 1: ReceiptText (Sesuai dengan kode yang Anda berikan) */}
+            <Link href={`/reservation/grooming/${user?.sub}`} className="text-gray-600 hover:text-gray-900 transition-colors">
+              <BookText size={24} /> 
+            </Link>
+
+            {/* Ikon 2: Package (Sesuai dengan kode yang Anda berikan) */}
+            <Link href="/product/order" className="text-gray-600 hover:text-gray-900 transition-colors">
+              <Package size={24} />
+            </Link>
+
+            {/* Ikon 3: ShoppingCart (Sesuai dengan kode yang Anda berikan) */}
+            <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
+              <ShoppingCart size={24} />
+            </a>
+            <Link href="/user/about" className="text-gray-600 hover:text-gray-900 transition-colors">
+                <User size={24} />
+            </Link>
+          </div>
         </div>
 
         {/* Hero Section */}
@@ -257,40 +323,20 @@ return (
         </div>
 
         {/* Doctor */}
-        <div className="flex flex-col md:flex-row gap-6 overflow-hidden max-w-[1200px] mx-auto mt-10">
+        <div className="flex flex-col md:flex-row gap-6 overflow-hidden max-w-[1200px] mx-auto mt-10 h-[70vh]">
           {/* KIRI - List tetap sama seperti sebelumnya */}
           <div className="bg-[#96C6CF] w-full md:w-1/2 p-6 flex flex-col rounded-xl">
-            <h2 className="text-white text-3xl font-bold mb-6 text-center">Checkup Form</h2>
-
-            <div className="flex justify-center gap-3 mb-6">
-              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full border border-[#373737]">
-                Normal Wash
-              </button>
-              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full border border-[#373737]">
-                Fungal Wash
-              </button>
-              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full border border-[#373737]">
-                Fleas Wash
-              </button>
-            </div>
+            <h2 className="text-white text-3xl font-bold mb-6 text-center">Doctor List</h2>
 
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-white scrollbar-track-transparent">
+              {doctors.map((doctor) => (
+              <Link href={`/doctor/${doctor.id}`} key={doctor.id} className={"no-underline"}>
               <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow-md text-sm leading-tight">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash</p>
-                <p className="font-bold text-[#373737]">75K</p>
-              </div>
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow-md text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser</p>
-                <p className="font-bold text-[#373737]">75K</p>
-              </div>
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow-md text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Sebazol</p>
-                <p className="font-bold text-[#373737]">75K</p>
-              </div>
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow-md text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser{'\n'}+Sebazol</p>
-                <p className="font-bold text-[#373737]">75K</p>
-              </div>
+                  <p className="font-semibold text-[#373737]">{doctor.name}</p>
+                  <p className="font-bold text-[#373737]">{doctor.speciality}</p>
+                </div>
+              </Link>
+              ))}
             </div>
 
               <Link href="/forms/clinic" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
@@ -363,25 +409,21 @@ return (
             </div>
 
             {/* List Items */}
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-white scrollbar-track-transparent">
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash</p>
-                <p className="font-bold text-[#373737]">75K</p>
-              </div>
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser</p>
-                <p className="font-bold text-[#373737]">75K</p>
-              </div>
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Sebazol</p>
-                <p className="font-bold text-[#373737]">75K</p>
-              </div>
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser{'\n'}+Sebazol</p>
-                <p className="font-bold text-[#373737]">75K</p>
-              </div>
+            <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white scrollbar-track-transparent">
+              {grooming.map((groom) => (
+              <Link href={`/doctor/${groom.id}`} key={groom.id} className={"no-underline"}>
+              <div className="bg-white px-4 py-3 rounded-xl flex items-center shadow-md text-sm leading-tight mt-4">
+                  <div className="flex flex-col">
+                    <p className="font-semibold text-[#373737]">{groom.name}</p>
+                    <p className="text-sm text-gray-600">{groom.specification}</p>
+                  </div>
+                  <div className="ml-auto">
+                    <p className="font-bold text-[#373737]">{groom.price}</p>
+                  </div>
+                </div>
+              </Link>
+              ))}
             </div>
-
             {/* BOOK NOW */}
                   <Link href="/home" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
                     View All Product <ArrowRight className="mr-2" /> 

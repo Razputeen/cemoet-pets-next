@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Calendar } from "lucide-react";
 import { Poppins } from 'next/font/google'
 import Link from "next/link";
-import Navbar from "../../Navbar/page";
+import Navbar from "../../components/Navbar/page";
 import { usedService, unusedService, input } from "../../style";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

@@ -1,14 +1,15 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar } from "lucide-react";
 import { Poppins } from "next/font/google";
 import Link from "next/link";
-import Navbar from "../../Navbar/page";
+import Navbar from "../../components/Navbar/page";
 import {
   usedService,
   unusedService,
   input,
 } from "../../style";
+import { useRouter } from "next/navigation";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -16,7 +17,36 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
+type User = {
+  id: string;
+  Name: string;
+  email: string;
+  roles: string;
+};
 export default function AppointmentForm() {
+        const [user, setUser] = useState<User | null>(null);
+        const router = useRouter();
+    
+          useEffect(() => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+              router.push("/Login");
+              return;
+            }
+      
+            fetch("http://localhost:3222/auth/profile", {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+              .then((res) => {
+                if (!res.ok) throw new Error("Unauthorized");
+                return res.json();
+              })
+              .then((data) => setUser(data))
+              .catch(() => {
+                localStorage.removeItem("token");
+                router.push("/Login");
+              });
+          }, []);
   return (
     <body className={poppins.className}>
       <Navbar />

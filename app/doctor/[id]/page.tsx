@@ -3,9 +3,10 @@
 import Image from 'next/image'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import head from'../../../image/ComponentAds1.png'
-import doc from '../../../image/Doc1.png'
+import head from'../../image/ComponentAds1.png'
+import doc from '../../image/Doc1.png'
 import { Poppins } from 'next/font/google';
+import { useEffect, useState } from 'react'
 
 // Configure Poppins. You can specify weights and subsets.
 const poppins = Poppins({
@@ -14,9 +15,31 @@ const poppins = Poppins({
   variable: '--font-poppins', // Define a CSS variable name for Tailwind
 });
 
-
+type Doctor = {
+  id: number;
+  name: string;
+  speciality: string;
+  email: string;
+  noTelp: string;
+  description: string;
+  quote: string
+}
 
 export default function HealthyPetPage() {
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+
+      useEffect(() => {
+        fetch('http://localhost:3222/doctors',{
+          method: 'GET',
+          cache: 'no-store'
+        } )
+          .then(res => res.json())
+          .then(json => {
+            console.log("DATA DARI SERVER:", json)
+            setDoctors(json.rows || json) // fallback jika rows tidak ada
+          })
+          .catch(err => console.error('Error fetching product:', err))
+      }, [])
   return (
     <div className="min-h-screen bg-[#f2f2f2] py-6 px-4">
       <div className="max-w-screen-lg mx-auto bg-white rounded-3xl shadow-md p-6">
@@ -40,13 +63,15 @@ export default function HealthyPetPage() {
             {/* Left Box */}
             <div className="bg-[#7F9DB6] text-white rounded-xl p-6">
               <h2 className="text-2xl font-bold mb-4 text-center">Healthy Pet</h2>
-              <p className="text-xs leading-relaxed font-semibold">
-                As a pet surgeon, I’ve seen firsthand how proper care can transform an animal’s life. Keeping pets healthy isn’t just about preventing illness — it’s about giving them the chance to live joyfully and pain-free. From balanced nutrition to regular checkups and timely surgeries when needed, every effort we make directly impacts their comfort and longevity. Our pets rely on us entirely, and it’s our duty to ensure they thrive, not just survive. A healthy pet means more tail wags, more cuddles, and more years of unconditional love.
+              {doctors.map((doctor) => (
+                <p className="text-xs leading-relaxed font-semibold">
+                {doctor.description}
                 <br /><br />
-                "A healthy pet is a happy companion — their well-being reflects the love and care we give."
+                "{doctor.quote}"
                 <br /><br />
-                — Dr. Chae Moet, Veterinary Surgeon
+                — {doctor.name}, {doctor.speciality}
               </p>
+              ))}
               <div className="text-right mt-20">
                 <Link href="/booking" className="inline-flex items-center gap-2 text-white font-bold text-lg">
                   Book Now <ArrowRight />

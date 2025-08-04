@@ -3,7 +3,6 @@
 import React, {useEffect} from "react";
 import {ConfigProvider} from "antd";
 import {TokenUtil} from "#/utils/token";
-
 TokenUtil.loadToken();
 export const Provider = ({children}: any) => {
   // useEffect(() => {
