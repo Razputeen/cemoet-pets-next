@@ -1,3 +1,4 @@
+'use client'
 import { ShoppingCart, User, BookText } from "lucide-react";
 import { Package } from "lucide-react";
 import { ReceiptText } from "lucide-react";
