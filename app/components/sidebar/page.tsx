@@ -21,11 +21,11 @@ export default function SidebarAdmin() {
     setOpenDropdown(openDropdown === menu ? null : menu)
   }
 
-  const userName = "Andrew Smith" // Ganti dari state/user context kalau perlu
+  const userName = "Cemoet Pets" // Ganti dari state/user context kalau perlu
 
   return (
     <div className={poppins.className}>
-    <aside className="w-72 h-screen bg-white text-gray-900 flex flex-col justify-between p-6 border-r rounded-r-3xl shadow-xl">
+    <aside className="w-72 h-screen bg-white text-gray-900 flex flex-col justify-between p-6 border-r rounded-2xl shadow-lg">
       {/* TOP: User Info */}
       <div>
         <h1 className="text-xl font-semibold mb-6">{userName}</h1>
@@ -80,7 +80,7 @@ export default function SidebarAdmin() {
             toggle={() => toggleDropdown("reservasi")}
             links={[
               { href: "/reservasi/dokter", label: "Reservasi Dokter" },
-              { href: "/reservasi/grooming", label: "Reservasi Grooming" },
+              { href: "/admin/reservasi/grooming", label: "Reservasi Grooming" },
             ]}
           />
 

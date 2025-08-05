@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlusIcon } from "lucide-react";
 import SidebarAdmin from "#/app/components/sidebar/page";
+import { CardContent } from "#/components/ui/card";
+import { Card } from "antd";
 
 type GroomingReservation = {
   id: string;
@@ -52,62 +54,75 @@ export default function AdminGroomList() {
       });
   }, []);
 
-  return (
-    <div className="bg-[#f2f2f2] flex justify-center items-center">
-    <div className="w-3/4 p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Grooming Reservations</h2>
-        <Link href="/admin/groom/create">
-          <button className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md">
-            <PlusIcon size={18} />
-            Tambah Reservasi
-          </button>
-        </Link>
-      </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border rounded-md shadow">
-          <thead className="bg-gray-100">
-            <tr className="text-left">
-              <th className="px-4 py-2">ID</th>
-              <th className="px-4 py-2">Nama Hewan</th>
-              <th className="px-4 py-2">Ras</th>
-              <th className="px-4 py-2">Jenis</th>
-              <th className="px-4 py-2">Umur</th>
-              <th className="px-4 py-2">Tanggal Booking</th>
-              <th className="px-4 py-2">Total Harga</th>
+
+  return (
+  <div className="max-w-screen-2xl mx-auto bg-[#f2f2f2] p-4 py-9 ">
+    <div className="min-h-screen bg-white px-4 rounded-3xl shadow-md p-4 flex flex-col md:flex-row gap-2">
+      <SidebarAdmin />
+
+      <div className="flex-1 max-w-screen mx-auto bg-white p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">List Grooming</h2>
+          <Link href="/admin/groom/create">
+            <PlusIcon className="w-6 h-6 text-blue-600 hover:text-blue-800 cursor-pointer" />
+          </Link>
+        </div>
+
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-gray-500">Total Appointments</p>
+              <p className="text-2xl font-bold">{groomingRes.length}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-gray-500">Total Appointments</p>
+              <p className="text-2xl font-bold">{groomingRes.length}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-gray-500">Total Revenue</p>
+              <p className="text-2xl font-bold text-blue-600">
+                ${groomingRes.reduce((sum, g) => sum + (g.totalPrice || 0), 0)}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+      <div className="bg-white rounded shadow overflow-x-auto">
+        <table className="min-w-full text-sm text-left">
+          <thead className="bg-gray-100 text-gray-700">
+            <tr>
+              <th className="px-4 py-2">Appointment ID</th>
+              <th className="px-4 py-2">Customer</th>
+              <th className="px-4 py-2">Pet Name</th>
+              <th className="px-4 py-2">Service</th>
+              <th className="px-4 py-2">Price</th>
               <th className="px-4 py-2">Status</th>
-              <th className="px-4 py-2">User</th>
-              <th className="px-4 py-2">Aksi</th>
+              <th className="px-4 py-2">Date</th>
+              <th className="px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {groomingRes.map((groom) => (
-              <tr key={groom.id} className="border-t border-gray-200">
-                <td className="px-4 py-2">{groom.id}</td>
-                <td className="px-4 py-2">{groom.petName}</td>
-                <td className="px-4 py-2">{groom.petType}</td>
+              <tr key={groom.id} className="border-t">
+                <td className="px-4 py-2 text-blue-600 font-medium">{groom.id}</td>
                 <td className="px-4 py-2">
-                  {new Date(groom.bookingDate).toLocaleDateString()}
+                  <div className="font-semibold">{groom.user.Name}</div>
                 </td>
-                <td className="px-4 py-2">Rp{groom.totalPrice.toLocaleString()}</td>
-                <td className="px-4 py-2">{groom.status}</td>
-                <td className="px-4 py-2">{groom.user?.Name || "-"}</td>
-                <td className="px-4 py-2 flex gap-2">
-                  <Link href={`/admin/groom/update/${groom.id}`}>
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-sm">
-                      Edit
-                    </button>
+                <td className="px-4 py-2"><div className="text-xs text-gray-500">{groom.petName}</div></td>
+                <td className="px-4 py-2">{groom.groomings[0].name} {groom.groomings[0].specification}</td>
+                <td className="px-4 py-2">{groom.totalPrice}</td>
+                <td className="px-4 py-2 font-medium">{groom.status}</td>
+                <td className="px-4 py-2">{new Date(groom.bookingDate).toLocaleDateString()}</td>
+                <td className="px-4 py-2">
+                  <Link href={`/admin/grooming/${groom.id}`} className="text-blue-600 hover:underline">
+                    View
                   </Link>
-                  <Link href={`/admin/groom/detail/${groom.id}`}>
-                    <button className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded-md text-sm">
-                      Detail
-                    </button>
-                  </Link>
-                  {/* Uncomment jika fitur delete aktif */}
-                  {/* <button onClick={() => handleDelete(groom.id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">
-                    Hapus
-                  </button> */}
                 </td>
               </tr>
             ))}
@@ -123,5 +138,6 @@ export default function AdminGroomList() {
       </div>
     </div>
     </div>
+  </div>
   );
 }

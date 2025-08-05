@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
-import { PlusIcon } from "lucide-react";
+import { CalendarCheck, CheckCircle, Clock, DollarSign, PlusIcon } from "lucide-react";
 import SidebarAdmin from "#/app/components/sidebar/page";
 
 type Grooming = {
@@ -63,60 +63,63 @@ const handleDelete = async (id: number) => {
 
       <div className="flex-1 max-w-screen mx-auto bg-white p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">List Dokter</h2>
+          <h2 className="text-2xl font-bold">List Grooming</h2>
           <Link href="/admin/groom/create">
             <PlusIcon className="w-6 h-6 text-blue-600 hover:text-blue-800 cursor-pointer" />
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white rounded shadow">
-            <thead className="bg-gray-100 text-gray-700 text-left">
-              <tr>
-                <th className="px-4 py-2">ID</th>
-                <th className="px-4 py-2">Nama</th>
-                <th className="px-4 py-2">Spesialis</th>
-                <th className="px-4 py-2">Price</th>
-                <th className="px-4 py-2">Aksi</th>
+
+      {/* Table */}
+      <div className="bg-white rounded shadow overflow-x-auto">
+        <table className="min-w-full text-sm text-left">
+          <thead className="bg-gray-100 text-gray-700">
+            <tr>
+              <th className="px-4 py-2">Appointment ID</th>
+              <th className="px-4 py-2">Customer</th>
+              <th className="px-4 py-2">Pet</th>
+              <th className="px-4 py-2">Service</th>
+              <th className="px-4 py-2">Price</th>
+              <th className="px-4 py-2">Status</th>
+              <th className="px-4 py-2">Date</th>
+              <th className="px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {grooming.map((a) => (
+              <tr key={a.id} className="border-t">
+                <td className="px-4 py-2 text-blue-600 font-medium">{a.id}</td>
+                <td className="px-4 py-2">
+                  <div className="font-semibold">{a.name}</div>
+                  <div className="text-xs text-gray-500">{a.specification}</div>
+                </td>
+                <td className="px-4 py-2">{a.price}</td>
+                <td className="px-4 py-2">{a.description}</td>
+                <td className="px-4 py-2 font-medium">${a.price.toFixed(2)}</td>
+                {/* <td className="px-4 py-2">
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      a.status === "Completed"
+                        ? "bg-green-100 text-green-600"
+                        : a.status === "Processing"
+                        ? "bg-yellow-100 text-yellow-600"
+                        : "bg-orange-100 text-orange-600"
+                    }`}
+                  >
+                    {a.status}
+                  </span>
+                </td>
+                <td className="px-4 py-2">{a.date}</td> */}
+                <td className="px-4 py-2">
+                  <Link href={`/admin/grooming/${a.id}`} className="text-blue-600 hover:underline">
+                    View
+                  </Link>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {grooming.map((groom) => (
-                <tr key={groom.id} className="border-t border-gray-300">
-                  <td className="px-4 py-2 text-gray-900">{groom.id}</td>
-                  <td className="px-4 py-2 text-gray-900">{groom.name}</td>
-                  <td className="px-4 py-2 text-gray-700">{groom.specification}</td>
-                  <td className="px-4 py-2 text-gray-700">{groom.price}</td>
-                  <td className="px-4 py-2 flex gap-2">
-                    <Link href={`/admin/doctor/update/${groom.id}`}>
-                      <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-md">
-                        Edit
-                      </button>
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(groom.id)}
-                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-md"
-                    >
-                      Hapus
-                    </button>
-                    <Link href={`/doctor/${groom.id}`}>
-                      <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded-md">
-                        Detail
-                      </button>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-              {grooming.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="text-center py-4 text-gray-500">
-                    Tidak ada data dokter.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
+      </div>
       </div>
     </div>
     </div>

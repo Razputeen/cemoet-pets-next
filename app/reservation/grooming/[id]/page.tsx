@@ -25,37 +25,60 @@ type User = {
   groom: GroomingReservation[];
 };
 
+type Users = {
+  sub: string;
+  Name: string;
+  email: string;
+  roles: string;
+  groom: GroomingReservation[];
+};
+
 export default function MyGroomingsPage() {
   const [user, setUser] = useState<User>();
+  const [users, setUsers] = useState<Users>();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 2;
   const router = useRouter();
 
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   if (!token) {
+  //     router.push("/Login");
+  //     return;
+  //   }
+
+  //   fetch("http://localhost:3222/auth/profile", {
+  //     headers: { Authorization: `Bearer ${token}` },
+  //   })
+  //     .then((res) => {
+  //       if (!res.ok) throw new Error("Unauthorized");
+  //       return res.json();
+  //     })
+  //     .then((data) => {
+  //       setUser(data);
+  //       console.log(data);
+  //     })
+  //     .catch(() => {
+  //       localStorage.removeItem("token");
+  //       router.push("/Login");
+  //     });
+  // }, []);
+
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/Login");
-      return;
-    }
-
-    fetch("http://localhost:3222/auth/profile", {
-      headers: { Authorization: `Bearer ${token}` },
+    fetch (`http://localhost:3222/users/${user?.sub}`,{
+      method: "GET",
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Unauthorized");
-        return res.json();
-      })
-      .then((data) => {
-        setUser(data);
-        console.log(data);
-      })
-      .catch(() => {
-        localStorage.removeItem("token");
-        router.push("/Login");
-      });
-  }, []);
+    .then((res) => {
+      if (!res.ok) throw new Error("Unauthorized");
+      return res.json();
+    })
+    .then((data) => {
+      setUsers(data);
+      console.log(data);
+    })
+  })
 
-  const groomings = user?.groom ?? [];
+  const groomings = users?.groom ?? [];
 
   const totalPages = Math.ceil(groomings.length / itemsPerPage);
   const paginatedGroomings = groomings.slice(

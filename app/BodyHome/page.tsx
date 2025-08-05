@@ -19,6 +19,7 @@ import dawg3 from '../image/Dawg3.jpg'
 import dawg4 from '../image/Dawg4.jpg'
 import { useRouter } from 'next/navigation';
 import router from "next/router";
+import ReservationDropdown from "../components/dropres/page";
 
 const images = [doc, dawgHero, docc]
 
@@ -179,15 +180,13 @@ return (
 
         {/* Header */}
         <div className="mb-6 flex justify-between">
-          <div>
+          <div className="flex flex-col bg-slate-100 p-4 rounded-lg">
             <h1 className="text-2xl font-bold">Welcome To Cemoet Pets</h1>
             <p className="text-gray-700">{user?.Name}</p>
           </div>
           <div className="flex items-center space-x-4 pr-4">
             {/* Ikon 1: ReceiptText (Sesuai dengan kode yang Anda berikan) */}
-            <Link href={`/reservation/grooming/${user?.sub}`} className="text-gray-600 hover:text-gray-900 transition-colors">
-              <BookText size={24} /> 
-            </Link>
+            <ReservationDropdown userId={""} />
 
             {/* Ikon 2: Package (Sesuai dengan kode yang Anda berikan) */}
             <Link href="/product/order" className="text-gray-600 hover:text-gray-900 transition-colors">
