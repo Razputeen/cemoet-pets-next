@@ -7,6 +7,7 @@ import head from'../../image/ComponentAds1.png'
 import doc from '../../image/Doc1.png'
 import { Poppins } from 'next/font/google';
 import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation';
 
 // Configure Poppins. You can specify weights and subsets.
 const poppins = Poppins({
@@ -26,21 +27,28 @@ type Doctor = {
 }
 
 export default function HealthyPetPage() {
-  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const params = useParams();
+  const doctorId = params?.id as string;
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
 
-      useEffect(() => {
-        fetch('http://localhost:3222/doctors',{
-          method: 'GET',
-          cache: 'no-store'
-        } )
-          .then(res => res.json())
-          .then(json => {
-            console.log("DATA DARI SERVER:", json)
-            setDoctors(json.rows || json) // fallback jika rows tidak ada
-          })
-          .catch(err => console.error('Error fetching product:', err))
-      }, [])
-  return (
+ useEffect(() => {
+    if (!doctorId) return;
+
+    fetch(`http://localhost:3222/doctors/${doctorId}`, {
+      method: "GET",
+      cache: "no-store",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch doctor");
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Doctor detail:", data);
+        setDoctor(data);
+      })
+      .catch((err) => console.error("Error fetching doctor detail:", err));
+  }, [doctorId]);
+  return(
     <div className="min-h-screen bg-[#f2f2f2] py-6 px-4">
       <div className="max-w-screen-lg mx-auto bg-white rounded-3xl shadow-md p-6">
 
@@ -63,15 +71,13 @@ export default function HealthyPetPage() {
             {/* Left Box */}
             <div className="bg-[#7F9DB6] text-white rounded-xl p-6">
               <h2 className="text-2xl font-bold mb-4 text-center">Healthy Pet</h2>
-              {doctors.map((doctor) => (
                 <p className="text-xs leading-relaxed font-semibold">
-                {doctor.description}
+                {doctor?.description}
                 <br /><br />
-                "{doctor.quote}"
+                "{doctor?.quote}"
                 <br /><br />
-                — {doctor.name}, {doctor.speciality}
+                — {doctor?.name}, {doctor?.speciality}
               </p>
-              ))}
               <div className="text-right mt-20">
                 <Link href="/booking" className="inline-flex items-center gap-2 text-white font-bold text-lg">
                   Book Now <ArrowRight />
@@ -93,5 +99,4 @@ export default function HealthyPetPage() {
       </div>
     </div>
   )
-
 }

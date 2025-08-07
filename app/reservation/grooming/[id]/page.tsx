@@ -6,7 +6,7 @@ import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Navbar from "../../../components/Navbar/page";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 type GroomingReservation = {
   id: string;
@@ -18,68 +18,34 @@ type GroomingReservation = {
 };
 
 type User = {
-  sub: string;
+  id: string;
   Name: string;
   email: string;
-  roles: string;
-  groom: GroomingReservation[];
-};
-
-type Users = {
-  sub: string;
-  Name: string;
-  email: string;
-  roles: string;
-  groom: GroomingReservation[];
+  phoneNum: string;
+  reserveGroom: GroomingReservation[];
+  role: { id: string; name: string };
 };
 
 export default function MyGroomingsPage() {
+  const params = useParams();
+  const userId = params?.id as string;
   const [user, setUser] = useState<User>();
-  const [users, setUsers] = useState<Users>();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 2;
   const router = useRouter();
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   if (!token) {
-  //     router.push("/Login");
-  //     return;
-  //   }
-
-  //   fetch("http://localhost:3222/auth/profile", {
-  //     headers: { Authorization: `Bearer ${token}` },
-  //   })
-  //     .then((res) => {
-  //       if (!res.ok) throw new Error("Unauthorized");
-  //       return res.json();
-  //     })
-  //     .then((data) => {
-  //       setUser(data);
-  //       console.log(data);
-  //     })
-  //     .catch(() => {
-  //       localStorage.removeItem("token");
-  //       router.push("/Login");
-  //     });
-  // }, []);
-
   useEffect(() => {
-    fetch (`http://localhost:3222/users/${user?.sub}`,{
-      method: "GET",
-    })
-    .then((res) => {
-      if (!res.ok) throw new Error("Unauthorized");
-      return res.json();
-    })
-    .then((data) => {
-      setUsers(data);
-      console.log(data);
-    })
-  })
+    async function fetchUser() {
+      const response = await fetch(`http://localhost:3222/users/${userId}`);
+      const data = await response.json();
+      setUser(data.data); // ✅ FIXED
+      console.log("🔥 FULL RESPONSE:", data);
+      console.log("🔥 reserveGroom isi:", data.data?.reserveGroom);
+    }
+    fetchUser();
+  }, [userId]);
 
-  const groomings = users?.groom ?? [];
-
+  const groomings = user?.reserveGroom ?? [];
   const totalPages = Math.ceil(groomings.length / itemsPerPage);
   const paginatedGroomings = groomings.slice(
     (currentPage - 1) * itemsPerPage,

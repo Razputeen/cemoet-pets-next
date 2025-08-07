@@ -57,14 +57,14 @@ const handleDelete = async (id: number) => {
 
   return (
     
-  <div className="max-w-screen-2xl mx-auto bg-[#f2f2f2] p-4">
-    <div className="min-h-screen bg-white py-9 px-4 rounded-3xl shadow-md p-4 flex flex-col md:flex-row">
+  <div className="max-w-screen-2xl mx-auto bg-[#f2f2f2] p-4 py-9 ">
+    <div className="min-h-screen bg-white px-4 rounded-3xl shadow-md p-4 flex flex-col md:flex-row gap-2">
       <SidebarAdmin />
 
       <div className="flex-1 max-w-screen mx-auto bg-white p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">List Dokter</h2>
-          <Link href="/admin/groom/create">
+          <Link href="/admin/doctor/create">
             <PlusIcon className="w-6 h-6 text-blue-600 hover:text-blue-800 cursor-pointer" />
           </Link>
         </div>

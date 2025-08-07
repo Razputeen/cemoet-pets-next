@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { CalendarCheck, CheckCircle, Clock, DollarSign, PlusIcon } from "lucide-react";
 import SidebarAdmin from "#/app/components/sidebar/page";
+import { CardContent } from "#/components/ui/card";
+import { Card } from "antd";
 
 type Grooming = {
   id: number
@@ -57,8 +59,8 @@ const handleDelete = async (id: number) => {
 
   return (
 
-  <div className="max-w-screen-2xl mx-auto bg-[#f2f2f2] p-4">
-    <div className="min-h-screen bg-white py-9 px-4 rounded-3xl shadow-md p-4 flex flex-col md:flex-row">
+  <div className="max-w-screen-2xl mx-auto bg-[#f2f2f2] p-4 py-9 ">
+    <div className="min-h-screen bg-white px-4 rounded-3xl shadow-md p-4 flex flex-col md:flex-row gap-2">
       <SidebarAdmin />
 
       <div className="flex-1 max-w-screen mx-auto bg-white p-6">
@@ -67,6 +69,29 @@ const handleDelete = async (id: number) => {
           <Link href="/admin/groom/create">
             <PlusIcon className="w-6 h-6 text-blue-600 hover:text-blue-800 cursor-pointer" />
           </Link>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-gray-500">Total Appointments</p>
+              <p className="text-2xl font-bold">{grooming.length}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-gray-500">Total Appointments</p>
+              <p className="text-2xl font-bold">{grooming.length}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-gray-500">Total Value</p>
+              <p className="text-2xl font-bold text-blue-600">
+                ${grooming.reduce((sum, g) => sum + (g.price || 0), 0)}
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
 
