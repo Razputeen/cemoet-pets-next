@@ -1,180 +1,189 @@
-"use client"
+"use client";
 
 import { useEffect, useState } from "react";
-import { CalendarCheck, Clock, CheckCircle, DollarSign } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PlusIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import SidebarAdmin from "#/app/components/sidebar/page";
+import { CardContent } from "#/components/ui/card";
+import { Card } from "antd";
 
-type GroomingAppointment = {
-  id: string;
-  customer: string;
-  email: string;
-  petName: string;
-  service: string;
-  date: string;
-  status: "Pending" | "Processing" | "Completed";
+type Product = {
+  id: number;
+  name: string;
   price: number;
+  description: string;
+  image: "";
+  totalPrice: number;
 };
 
-const mockData: GroomingAppointment[] = [
-  {
-    id: "GR-2024-001",
-    customer: "Sarah Johnson",
-    email: "sarah@gmail.com",
-    petName: "Max",
-    service: "Full Grooming",
-    date: "Aug 05, 2025",
-    status: "Completed",
-    price: 35.0,
-  },
-  {
-    id: "GR-2024-002",
-    customer: "Mike Chen",
-    email: "mike@gmail.com",
-    petName: "Whiskers",
-    service: "Bath & Brush",
-    date: "Aug 04, 2025",
-    status: "Processing",
-    price: 25.5,
-  },
-  {
-    id: "GR-2024-003",
-    customer: "Emma Davis",
-    email: "emma@gmail.com",
-    petName: "Coco",
-    service: "Nail Trimming",
-    date: "Aug 03, 2025",
-    status: "Pending",
-    price: 15.0,
-  },
-  {
-    id: "GR-2024-004",
-    customer: "David Wilson",
-    email: "david@gmail.com",
-    petName: "Goldie",
-    service: "Haircut",
-    date: "Aug 02, 2025",
-    status: "Completed",
-    price: 30.0,
-  },
-];
+export default function AdminProductList() {
+  const [productMng, setProduct] = useState<Product[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const itemsPerPage = 10;
 
-export default function AdminGroomingPage() {
-  const [appointments, setAppointments] = useState<GroomingAppointment[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
-    setAppointments(mockData);
+    fetch("http://localhost:3222/product_management")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setProduct(data);
+        } else {
+          console.error("Expected array but got:", data);
+        }
+      })
+      .catch((err) => {
+        console.error("Fetch error:", err);
+      });
   }, []);
 
-  const total = appointments.length;
-  const pending = appointments.filter(a => a.status === "Pending").length;
-  const completed = appointments.filter(a => a.status === "Completed").length;
-  const revenue = appointments.reduce((sum, a) => sum + a.price, 0);
+  const totalPages = Math.ceil(productMng.length / itemsPerPage);
+  const paginatedData = productMng.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handleNavigateToCreate = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      router.push("/admin/product/create");
+    }, 800); // simulasi delay untuk efek loading
+  };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-2xl font-bold">Grooming Appointments</h2>
-          <p className="text-gray-500">Manage and track pet grooming schedules</p>
+    <div className="relative">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
         </div>
-        <Link
-          href="/admin/grooming/create"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          + New Appointment
-        </Link>
-      </div>
+      )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded shadow p-4 flex items-center space-x-4">
-          <CalendarCheck className="text-blue-600" />
-          <div>
-            <p className="text-sm text-gray-500">Total Appointments</p>
-            <p className="text-xl font-semibold">{total}</p>
-          </div>
-        </div>
-        <div className="bg-white rounded shadow p-4 flex items-center space-x-4">
-          <Clock className="text-yellow-500" />
-          <div>
-            <p className="text-sm text-gray-500">Pending</p>
-            <p className="text-xl font-semibold">{pending}</p>
-          </div>
-        </div>
-        <div className="bg-white rounded shadow p-4 flex items-center space-x-4">
-          <CheckCircle className="text-green-600" />
-          <div>
-            <p className="text-sm text-gray-500">Completed</p>
-            <p className="text-xl font-semibold">{completed}</p>
-          </div>
-        </div>
-        <div className="bg-white rounded shadow p-4 flex items-center space-x-4">
-          <DollarSign className="text-blue-500" />
-          <div>
-            <p className="text-sm text-gray-500">Revenue</p>
-            <p className="text-xl font-semibold">${revenue.toFixed(2)}</p>
-          </div>
-        </div>
-      </div>
+      {/* Main Page */}
+      <div className="max-w-screen-2xl mx-auto bg-[#f2f2f2] p-4 py-9">
+        <div className="min-h-screen bg-white px-4 rounded-3xl shadow-md p-4 flex flex-col md:flex-row gap-2">
+          <SidebarAdmin />
 
-      {/* Table */}
-      <div className="bg-white rounded shadow overflow-x-auto">
-        <table className="min-w-full text-sm text-left">
-          <thead className="bg-gray-100 text-gray-700">
-            <tr>
-              <th className="px-4 py-2">Appointment ID</th>
-              <th className="px-4 py-2">Customer</th>
-              <th className="px-4 py-2">Pet</th>
-              <th className="px-4 py-2">Service</th>
-              <th className="px-4 py-2">Price</th>
-              <th className="px-4 py-2">Status</th>
-              <th className="px-4 py-2">Date</th>
-              <th className="px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {appointments.map((a) => (
-              <tr key={a.id} className="border-t">
-                <td className="px-4 py-2 text-blue-600 font-medium">{a.id}</td>
-                <td className="px-4 py-2">
-                  <div className="font-semibold">{a.customer}</div>
-                  <div className="text-xs text-gray-500">{a.email}</div>
-                </td>
-                <td className="px-4 py-2">{a.petName}</td>
-                <td className="px-4 py-2">{a.service}</td>
-                <td className="px-4 py-2 font-medium">${a.price.toFixed(2)}</td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      a.status === "Completed"
-                        ? "bg-green-100 text-green-600"
-                        : a.status === "Processing"
-                        ? "bg-yellow-100 text-yellow-600"
-                        : "bg-orange-100 text-orange-600"
-                    }`}
-                  >
-                    {a.status}
-                  </span>
-                </td>
-                <td className="px-4 py-2">{a.date}</td>
-                <td className="px-4 py-2">
-                  <Link href={`/admin/grooming/${a.id}`} className="text-blue-600 hover:underline">
-                    View
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          <div className="flex-1 max-w-screen mx-auto bg-white p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold bg-slate-100 p-2 rounded-lg">
+                Product Management
+              </h2>
+              <button
+                onClick={handleNavigateToCreate}
+                disabled={isLoading}
+                className="relative"
+              >
+                <PlusIcon className="w-6 h-6 text-blue-600 hover:text-blue-800 cursor-pointer" />
+              </button>
+            </div>
 
-      {/* Pagination */}
-      <div className="mt-4 flex justify-between items-center">
-        <p className="text-sm text-gray-500">Showing 1 to {appointments.length} of {appointments.length} appointments</p>
-        <div className="space-x-1">
-          <button className="px-3 py-1 border rounded bg-gray-100 text-gray-700">1</button>
-          <button className="px-3 py-1 border rounded text-gray-500 hover:bg-gray-100">2</button>
-          <button className="px-3 py-1 border rounded text-gray-500 hover:bg-gray-100">3</button>
+            {/* Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <Card className="rounded-lg bg-gray-100">
+                <CardContent className="p-4">
+                  <p className="text-gray-500">Total Penjualan</p>
+                  <p className="text-2xl font-bold">{productMng.length}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-lg bg-gray-100">
+                <CardContent className="p-4">
+                  <p className="text-gray-500">Total Revenue</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    $
+                    {productMng.reduce(
+                      (sum, g) => sum + (g.totalPrice || 0),
+                      0
+                    )}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Table */}
+            <div className="bg-white rounded shadow overflow-x-auto">
+              <table className="min-w-full text-sm text-left">
+                <thead className="bg-gray-100 text-gray-700">
+                  <tr>
+                    <th className="px-4 py-2">Foto Produk</th>
+                    <th className="px-4 py-2">Product Name</th>
+                    <th className="px-4 py-2">Price</th>
+                    <th className="px-4 py-2">Deskripsi</th>
+                    <th className="px-4 py-2">Stock</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedData.map((product) => (
+                    <tr key={product.id} className="border-t">
+                      <td className="px-4 py-2 text-blue-600 font-medium">
+                        {product.image}
+                      </td>
+                      <td className="px-4 py-2 font-semibold">
+                        {product.name}
+                      </td>
+                      <td className="px-4 py-2">${product.totalPrice}</td>
+                      <td className="px-4 py-2">
+                        <Link
+                          href={`/admin/product/${product.id}`}
+                          className="text-blue-600 hover:underline"
+                        >
+                          View
+                        </Link>
+                      </td>
+                      <td className="px-4 py-2">{product.price}</td>
+                    </tr>
+                  ))}
+                  {paginatedData.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className="text-center py-4 text-gray-500"
+                      >
+                        Tidak ada data.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex justify-center items-center mt-8 gap-2">
+              <button
+                className="px-3 py-1 border rounded disabled:opacity-50"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  className={`px-3 py-1 border rounded ${
+                    currentPage === i + 1 ? "bg-blue-600 text-white" : ""
+                  }`}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                className="px-3 py-1 border rounded disabled:opacity-50"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
