@@ -11,6 +11,9 @@ export default function AdminProductCreate() {
     specification: string;
     stock: string;
     image: File | null;
+    brand: string;
+    category: string;
+    weight: string;
   }>({
     name: "",
     price: "",
@@ -18,6 +21,9 @@ export default function AdminProductCreate() {
     specification: "",
     stock: "",
     image: null,
+    brand: "",
+    category: "",
+    weight: "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -33,21 +39,30 @@ export default function AdminProductCreate() {
     formData.append("description", product.description);
     formData.append("specification", product.specification);
     formData.append("stock", product.stock);
+    formData.append("brand", product.brand);
+    formData.append("category", product.category);
+    formData.append("weight", product.weight);
     if (product.image) {
       formData.append("image", product.image);
     }
 
-    const res = await fetch("http://localhost:3222/product", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch("http://localhost:3222/product", {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await res.json();
-    if (res.ok) {
-      alert("Register berhasil");
-      router.push("/admin/product");
-    } else {
-      alert(data.message || "Gagal register");
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Produk berhasil ditambahkan");
+        router.push("/admin/product");
+      } else {
+        alert(data.message || "Gagal menambahkan produk");
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan: " + err);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -56,7 +71,7 @@ export default function AdminProductCreate() {
     setIsLoading(true);
     setTimeout(() => {
       router.back();
-    }, 600); // animasi delay
+    }, 600);
   };
 
   return (
@@ -68,9 +83,7 @@ export default function AdminProductCreate() {
         </div>
       )}
 
-      {/* Form Content */}
       <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-8 relative">
-        {/* Tombol Back */}
         <button
           onClick={handleBack}
           className="absolute top-0 left-0 mt-4 ml-4 text-blue-600 hover:underline"
@@ -85,16 +98,35 @@ export default function AdminProductCreate() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            name="product"
+            placeholder="Nama Brand"
+            className="w-full border p-2 rounded"
+            value={product.brand}
+            onChange={(e) => setProduct({ ...product, brand: e.target.value })}
+            required
+          />
+
+          <input
+            type="text"
             placeholder="Nama Product"
             className="w-full border p-2 rounded"
             value={product.name}
             onChange={(e) => setProduct({ ...product, name: e.target.value })}
             required
           />
+
           <input
             type="text"
-            name="specification"
+            placeholder="Kategori"
+            className="w-full border p-2 rounded"
+            value={product.category}
+            onChange={(e) =>
+              setProduct({ ...product, category: e.target.value })
+            }
+            required
+          />
+
+          <input
+            type="text"
             placeholder="Spesifikasi"
             className="w-full border p-2 rounded"
             value={product.specification}
@@ -103,30 +135,37 @@ export default function AdminProductCreate() {
             }
             required
           />
+
           <input
             type="number"
-            name="stock"
             placeholder="Stock"
             className="w-full border p-2 rounded"
             value={product.stock}
             onChange={(e) => setProduct({ ...product, stock: e.target.value })}
             required
           />
+
           <input
             type="text"
-            name="price"
             placeholder="Harga"
             className="w-full border p-2 rounded"
             value={product.price}
             onChange={(e) => setProduct({ ...product, price: e.target.value })}
             required
           />
-          <label className="block text-sm text-gray-600 mb-1">
-            Foto Produk
-          </label>
+
+          <input
+            type="number"
+            placeholder="Berat (gram)"
+            className="w-full border p-2 rounded"
+            value={product.weight}
+            onChange={(e) => setProduct({ ...product, weight: e.target.value })}
+            required
+          />
+
           <input
             type="file"
-            name="image"
+            accept="image/*"
             className="w-full border p-2 rounded"
             onChange={(e) => {
               const file = e.target.files?.[0];
@@ -136,8 +175,8 @@ export default function AdminProductCreate() {
             }}
             required
           />
+
           <textarea
-            name="description"
             placeholder="Deskripsi"
             className="w-full border p-2 rounded"
             rows={4}
@@ -147,6 +186,7 @@ export default function AdminProductCreate() {
             }
             required
           ></textarea>
+
           <button
             type="submit"
             disabled={isLoading}

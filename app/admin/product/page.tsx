@@ -1,57 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { PlusIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import SidebarAdmin from "#/app/components/sidebar/page";
 import { CardContent } from "#/components/ui/card";
 import { Card } from "antd";
 
 type Product = {
   id: number;
+  brand: string;
   name: string;
   price: number;
   description: string;
   image: "";
   totalPrice: number;
+  stock: number;
 };
 
 export default function AdminProductList() {
   const [productMng, setProduct] = useState<Product[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const itemsPerPage = 10;
-
-  const router = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
-    fetch("http://localhost:3222/product_management")
+    fetch("http://localhost:3222/product")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
           setProduct(data);
-        } else {
-          console.error("Expected array but got:", data);
         }
       })
-      .catch((err) => {
-        console.error("Fetch error:", err);
-      });
+      .catch((err) => console.error("Fetch error:", err));
   }, []);
 
+  // Hitung total halaman
   const totalPages = Math.ceil(productMng.length / itemsPerPage);
-  const paginatedData = productMng.slice(
+
+  // Ambil data sesuai halaman
+  const currentData = productMng.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  const handleNavigateToCreate = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      router.push("/admin/product/create");
-    }, 800); // simulasi delay untuk efek loading
-  };
 
   return (
     <div className="relative">
@@ -62,7 +52,6 @@ export default function AdminProductList() {
         </div>
       )}
 
-      {/* Main Page */}
       <div className="max-w-screen-2xl mx-auto bg-[#f2f2f2] p-4 py-9">
         <div className="min-h-screen bg-white px-4 rounded-3xl shadow-md p-4 flex flex-col md:flex-row gap-2">
           <SidebarAdmin />
@@ -73,7 +62,7 @@ export default function AdminProductList() {
                 Product Management
               </h2>
               <button
-                onClick={handleNavigateToCreate}
+                onClick={() => setIsLoading(true)}
                 disabled={isLoading}
                 className="relative"
               >
@@ -85,104 +74,69 @@ export default function AdminProductList() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <Card className="rounded-lg bg-gray-100">
                 <CardContent className="p-4">
-                  <p className="text-gray-500">Total Penjualan</p>
+                  <p className="text-gray-500">Total Produk</p>
                   <p className="text-2xl font-bold">{productMng.length}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-lg bg-gray-100">
-                <CardContent className="p-4">
-                  <p className="text-gray-500">Total Revenue</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    $
-                    {productMng.reduce(
-                      (sum, g) => sum + (g.totalPrice || 0),
-                      0
-                    )}
-                  </p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded shadow overflow-x-auto">
+            <div className="bg-white rounded shadow overflow-x-auto mb-6">
               <table className="min-w-full text-sm text-left">
                 <thead className="bg-gray-100 text-gray-700">
                   <tr>
-                    <th className="px-4 py-2">Foto Produk</th>
+                    <th className="px-4 py-2">Brand</th>
                     <th className="px-4 py-2">Product Name</th>
                     <th className="px-4 py-2">Price</th>
-                    <th className="px-4 py-2">Deskripsi</th>
+                    <th className="px-4 py-2">Description</th>
                     <th className="px-4 py-2">Stock</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedData.map((product) => (
+                  {currentData.map((product) => (
                     <tr key={product.id} className="border-t">
-                      <td className="px-4 py-2 text-blue-600 font-medium">
-                        {product.image}
+                      <td className="px-4 py-2 font-semibold">
+                        {product.brand}
                       </td>
                       <td className="px-4 py-2 font-semibold">
                         {product.name}
                       </td>
-                      <td className="px-4 py-2">${product.totalPrice}</td>
-                      <td className="px-4 py-2">
-                        <Link
-                          href={`/admin/product/${product.id}`}
-                          className="text-blue-600 hover:underline"
-                        >
-                          View
-                        </Link>
-                      </td>
                       <td className="px-4 py-2">{product.price}</td>
+                      <td className="px-4 py-2">{product.description}</td>
+                      <td className="px-4 py-2">{product.stock}</td>
                     </tr>
                   ))}
-                  {paginatedData.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={8}
-                        className="text-center py-4 text-gray-500"
-                      >
-                        Tidak ada data.
-                      </td>
-                    </tr>
-                  )}
                 </tbody>
               </table>
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-center items-center mt-8 gap-2">
+            <div className="flex justify-center gap-2">
               <button
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
               >
-                <ChevronLeft size={16} />
+                Prev
               </button>
-
-              {Array.from({ length: totalPages }, (_, i) => (
-                <button
-                  key={i}
-                  className={`px-3 py-1 border rounded ${
-                    currentPage === i + 1 ? "bg-blue-600 text-white" : ""
-                  }`}
-                  onClick={() => setCurrentPage(i + 1)}
-                >
-                  {i + 1}
-                </button>
-              ))}
-
+              <span className="px-3 py-1">
+                Page {currentPage} of {totalPages}
+              </span>
               <button
-                className="px-3 py-1 border rounded disabled:opacity-50"
+                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
                 onClick={() =>
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
               >
-                <ChevronRight size={16} />
+                Next
               </button>
             </div>
+
+            {/* Jika tidak ada data */}
+            {productMng.length === 0 && (
+              <p className="text-center py-4 text-gray-500">Tidak ada data.</p>
+            )}
           </div>
         </div>
       </div>
