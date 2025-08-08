@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "../image/Component50.png";
 import { Poppins } from "next/font/google";
-import Navbar from "../Navbar/page";
+import Navbar from "../components/Navbar/page";
+import { useEffect, useState } from "react";
 
 // Setup Poppins
 const poppins = Poppins({
@@ -13,54 +14,35 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
-export const products = [
-  {
-    id: 1,
-    name: "Whiskas",
-    price: "Rp 20.000",
-    image: "/image/W1.jpg",
-    rating: 4.8,
-    reviews: 234,
 
-    stock: 12,
-    badge: "Best Seller",
-    description: "Wiskas kontol",
-  },
-  {
-    id: 2,
-    name: "Royal Canin",
-    price: "Rp 50.000",
-    image: "/image/rc1.jpg",
-    rating: 4.8,
-    reviews: 234,
-    stock: 12,
-    badge: "Best Seller",
-    description: "Royal canin kontol",
-  },
-  {
-    id: 3,
-    name: "Pedigree",
-    price: "Rp 35.000",
-    image: "/image/p1.jpg",
-    rating: 4.8,
-    reviews: 234,
-    stock: 12,
-    badge: "Best Seller",
-    description: "",
-  },
-];
 
 export default function ProductListPage() {
+  const [product, setProduct] = useState<products[]>([])
   type products = {
     id: number;
     name: string;
     price: string;
     image: string;
-    rating: number;
-    reviews: number;
-    discount: string;
-    badge: string;
+    stock: number;
+    description: string;
+    specification: string;
+    brand: string;
+    category: string;
+    weight: number;
   };
+
+    useEffect(() => {
+      fetch('http://localhost:3222/product',{
+        method: 'GET',
+        cache: 'no-store'
+      } )
+        .then(res => res.json())
+        .then(json => {
+          console.log("DATA DARI SERVER:", json)
+          setProduct(json.rows || json) // fallback jika rows tidak ada
+        })
+        .catch(err => console.error('Error fetching product:', err))
+    }, [])
   return (
     <>
       <Navbar />
@@ -94,35 +76,34 @@ export default function ProductListPage() {
 
         {/* Product Grid */}
         {/* Product Grid */}
-        {products.map((products) => (
-          <Link
-            key={products.id}
-            href={`/ProductDetail/${products.id}`}
-            className="decoration-none"
+        {/* Product Card */}
+      <div className="flex justify-center gap-4 overflow-x-auto px-4 p-2">
+        {product.map((product) => (
+          <Link key={product.id} href={`/product/${product.id}`}>
+          <div
+            key={product.id}
+            className="min-w-[250px] bg-white rounded-2xl shadow-md border-solid border-2 p-4 flex flex-col gap-3 relative"
           >
-            <section className="px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12">
-              <div
-                key={products.id}
-                className="border border-gray-200 rounded-lg p-4 text-center hover:shadow transition"
-              >
-                <Image
-                  src={products.image}
-                  alt={products.name}
-                  width={150}
-                  height={150}
-                  className="mx-auto mb-2"
-                />
-                <h3 className="font-semibold mb-1">{products.name}</h3>
-                <p className="text-gray-600 mb-4">{products.price}</p>
-                <div className="flex justify-center space-x-2">
-                  <button className="bg-sky-600 text-white px-4 py-2 rounded-full w-full">
-                    Add To Cart
-                  </button>
-                </div>
-              </div>
-            </section>
+            <img
+              src={product.image}
+              alt={product.name}
+              className="rounded-xl object-cover w-full h-48"
+            />
+            <div className="flex flex-col gap-1">
+              <h4 className="font-normal text-[#373737] text-md">
+                {product.name}
+              </h4>
+              <h4 className="text-xs text-gray-400 uppercase">{product.weight}Kg  </h4>
+              {/* <span className="text-xs text-gray-400 uppercase">{product.brand}</span> */}
+              <p className="text-lg font-semibold text-[#373737]">{product.price}</p>
+            </div>
+            <button className="absolute bottom-4 right-4 bg-[#373737] text-white rounded-full w-9 h-9 flex items-center justify-center hover:scale-105 transition">
+              +
+            </button>
+          </div>
           </Link>
         ))}
+      </div>
         {/* Pagination */}
         <div className="flex justify-center gap-2 mb-12">
           <button className="px-3 py-1 border border-gray-300 rounded">

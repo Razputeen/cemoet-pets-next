@@ -186,7 +186,7 @@ return (
           </div>
           <div className="flex items-center space-x-4 pr-4">
             {/* Ikon 1: ReceiptText (Sesuai dengan kode yang Anda berikan) */}
-                <div className="relative group inline-block text-left">
+    <div className="relative group inline-block text-left">
       <button className="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
         <BookText size={24} />
       </button>
@@ -313,33 +313,34 @@ return (
         className='w-full rounded-xl'
         ></Image>,
         </div>
-          <Link href="/products" className="flex items-center text-black font-bold  text-xl mb-4 pl-28 no-underline pt-6">
+          <Link href="/product" className="flex items-center text-black font-bold  text-xl mb-4 pl-28 no-underline pt-6">
             View All Product <ArrowRight className="mr-2" /> 
           </Link>
         {/* Product Card */}
-        <div className="flex justify-center gap-4 overflow-x-auto px-4">
-          {products.map((product) => (
-            <div
-              className="min-w-[200px] bg-white rounded-xl shadow-md p-4 text-center"
-              key={product.id}
-            >
-              <Image
-                src={product.image}
-                alt={product.name}
-                width={100}
-                height={100}
-                className="mx-auto mb-2"
-              />
-              <h4 className="font-bold text-[#373737]">{product.name}</h4>
-              <p className="text-lg font-semibold mt-2 text-[#373737]">{product.price}</p>
-              <div className="mt-4">
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                  Buy Now
-                </button>
-              </div>
+      <div className="flex justify-center gap-4 overflow-x-auto px-4 p-2">
+        {products.map((product) => (
+          <div
+            key={product.id}
+            className="min-w-[250px] bg-white rounded-2xl shadow-md border-solid border-2 p-4 flex flex-col gap-3 relative"
+          >
+            <img
+              src={product.image}
+              alt={product.name}
+              className="rounded-xl object-cover w-full h-48"
+            />
+            <div className="flex flex-col gap-1">
+              <h4 className="font-normal text-[#373737] text-md">
+                {product.name}
+              </h4>
+              {/* <span className="text-xs text-gray-400 uppercase">{product.brand}</span> */}
+              <p className="text-lg font-semibold text-[#373737]">{product.price}</p>
             </div>
-          ))}
-        </div>
+            <button className="absolute bottom-4 right-4 bg-black text-white rounded-full w-9 h-9 flex items-center justify-center hover:scale-105 transition">
+              +
+            </button>
+          </div>
+        ))}
+      </div>
         
         {/* Ads 2 */}
         <div className="pt-24 r max-w-screen-xl mx-auto">
