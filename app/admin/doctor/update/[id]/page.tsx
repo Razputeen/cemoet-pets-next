@@ -1,44 +1,138 @@
-"use client"
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+"use client";
 
-export default function EditDoctorPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const [doctor, setDoctor] = useState({
-    name: "", speciality: "", email: "", noTelp: "", description: ""
-  })
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-  useEffect(() => {
-    fetch(`http://localhost:3222/doctors/${params.id}`)
-      .then(res => res.json())
-      .then(data => setDoctor(data))
-  }, [params.id])
+export default function AdminDoctorCreate() {
+  const [doctors, setDoctors] = useState({
+    name: "",
+    speciality: "",
+    email: "",
+    noTelp: "",
+    description: "",
+    quote: "",
+  });
 
-  const handleChange = (e: any) => {
-    setDoctor({ ...doctor, [e.target.name]: e.target.value })
-  }
+  const [isLoading, setIsLoading] = useState(false); // ✅ tambahkan
+  const router = useRouter();
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault()
-    await fetch(`http://localhost:3222/doctors/${params.id}`, {
-      method: "PATCH",
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const res = await fetch("http://localhost:3222/doctors", {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(doctor)
-    })
-    router.push("/admin/doctor")
-  }
+      body: JSON.stringify(doctors),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert("Register berhasil");
+      router.push("/admin/doctor");
+    } else {
+      alert(data.message || "Gagal register");
+      setIsLoading(false);
+    }
+  };
+
+  const handleBack = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      router.back();
+    }, 500);
+  };
 
   return (
-    <div className="max-w-xl mx-auto mt-10 bg-white p-6 rounded shadow">
-      <h1 className="text-2xl mb-4 font-bold">Edit Doctor</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input name="name" value={doctor.name} onChange={handleChange} className="w-full border p-2" placeholder="Name" />
-        <input name="speciality" value={doctor.speciality} onChange={handleChange} className="w-full border p-2" placeholder="Speciality" />
-        <input name="email" value={doctor.email} onChange={handleChange} className="w-full border p-2" placeholder="Email" />
-        <input name="noTelp" value={doctor.noTelp} onChange={handleChange} className="w-full border p-2" placeholder="No. Telp" />
-        <textarea name="description" value={doctor.description} onChange={handleChange} className="w-full border p-2" placeholder="Description" />
-        <button className="bg-blue-600 text-white px-4 py-2 rounded">Update</button>
-      </form>
+    <div className="relative">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
+
+      <div className="max-w-xl mx-auto p-6 bg-white rounded shadow mt-8 relative">
+        {/* Tombol Back */}
+        <button
+          onClick={handleBack}
+          className="absolute top-0 left-0 mt-4 ml-4 text-blue-600 hover:underline"
+          disabled={isLoading}
+        >
+          ← Kembali
+        </button>
+
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          Tambah Dokter Baru
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            name="name"
+            placeholder="Nama Dokter"
+            className="w-full border p-2 rounded"
+            value={doctors.name}
+            onChange={(e) => setDoctors({ ...doctors, name: e.target.value })}
+            required
+          />
+          <input
+            type="text"
+            name="speciality"
+            placeholder="Spesialis"
+            className="w-full border p-2 rounded"
+            value={doctors.speciality}
+            onChange={(e) =>
+              setDoctors({ ...doctors, speciality: e.target.value })
+            }
+            required
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            className="w-full border p-2 rounded"
+            value={doctors.email}
+            onChange={(e) => setDoctors({ ...doctors, email: e.target.value })}
+            required
+          />
+          <input
+            type="text"
+            name="noTelp"
+            placeholder="Nomor Telepon"
+            className="w-full border p-2 rounded"
+            value={doctors.noTelp}
+            onChange={(e) => setDoctors({ ...doctors, noTelp: e.target.value })}
+            required
+          />
+          <input
+            type="text"
+            name="quote"
+            placeholder="Kata Mutiara"
+            className="w-full border p-2 rounded"
+            value={doctors.quote}
+            onChange={(e) => setDoctors({ ...doctors, quote: e.target.value })}
+            required
+          />
+          <textarea
+            name="description"
+            placeholder="Deskripsi"
+            className="w-full border p-2 rounded"
+            rows={4}
+            value={doctors.description}
+            onChange={(e) =>
+              setDoctors({ ...doctors, description: e.target.value })
+            }
+            required
+          ></textarea>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
     </div>
-  )
+  );
 }
