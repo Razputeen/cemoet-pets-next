@@ -22,7 +22,7 @@ export default function ProductListPage() {
     id: number;
     name: string;
     price: string;
-    image: string;
+    image: string[];
     stock: number;
     description: string;
     specification: string;
@@ -85,7 +85,7 @@ export default function ProductListPage() {
             className="min-w-[250px] bg-white rounded-2xl shadow-md border-solid border-2 p-4 flex flex-col gap-3 relative"
           >
             <img
-              src={product.image}
+              src={product.image?.[0]}
               alt={product.name}
               className="rounded-xl object-cover w-full h-48"
             />

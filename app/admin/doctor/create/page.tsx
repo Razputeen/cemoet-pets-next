@@ -37,7 +37,6 @@ export default function AdminDoctorCreate() {
   };
 
   const handleBack = () => {
-    // ✅ tambahkan
     setIsLoading(true);
     setTimeout(() => {
       router.back();

@@ -2,28 +2,29 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { parse } from "path";
 
 export default function AdminProductCreate() {
   const [product, setProduct] = useState<{
     name: string;
-    price: string;
+    price: number;
     description: string;
     specification: string;
-    stock: string;
-    image: File | null;
+    stock: number;
+    image: File[];
     brand: string;
     category: string;
-    weight: string;
+    weight: number;
   }>({
     name: "",
-    price: "",
+    price: 0,
     description: "",
     specification: "",
-    stock: "",
-    image: null,
+    stock: 0,
+    image: [],
     brand: "",
     category: "",
-    weight: "",
+    weight: 0,
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -35,16 +36,17 @@ export default function AdminProductCreate() {
 
     const formData = new FormData();
     formData.append("name", product.name);
-    formData.append("price", product.price);
+    formData.append("price", String(product.price)); // number -> string
     formData.append("description", product.description);
     formData.append("specification", product.specification);
-    formData.append("stock", product.stock);
+    formData.append("stock", String(product.stock)); // number -> string
     formData.append("brand", product.brand);
     formData.append("category", product.category);
-    formData.append("weight", product.weight);
-    if (product.image) {
-      formData.append("image", product.image);
-    }
+    formData.append("weight", String(product.weight)); // number -> string
+
+    product.image.forEach((img) => {
+      formData.append("images", img); // langsung append File
+    });
 
     try {
       const res = await fetch("http://localhost:3222/product", {
@@ -140,17 +142,15 @@ export default function AdminProductCreate() {
             type="number"
             placeholder="Stock"
             className="w-full border p-2 rounded"
-            value={product.stock}
-            onChange={(e) => setProduct({ ...product, stock: e.target.value })}
+            onChange={(e) => setProduct({ ...product, stock: parseInt(e.target.value) })}
             required
           />
 
           <input
-            type="text"
+            type="number"
             placeholder="Harga"
             className="w-full border p-2 rounded"
-            value={product.price}
-            onChange={(e) => setProduct({ ...product, price: e.target.value })}
+            onChange={(e) => setProduct({ ...product, price: parseInt(e.target.value) })}
             required
           />
 
@@ -158,23 +158,22 @@ export default function AdminProductCreate() {
             type="number"
             placeholder="Berat (gram)"
             className="w-full border p-2 rounded"
-            value={product.weight}
-            onChange={(e) => setProduct({ ...product, weight: e.target.value })}
+            onChange={(e) => setProduct({ ...product, weight: parseInt(e.target.value) })}
             required
           />
 
           <input
             type="file"
             accept="image/*"
+            multiple
             className="w-full border p-2 rounded"
             onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setProduct({ ...product, image: file });
-              }
+              const files = e.target.files ? Array.from(e.target.files) : [];
+              setProduct({ ...product, image: [...product.image, ...files] });
             }}
             required
           />
+
 
           <textarea
             placeholder="Deskripsi"

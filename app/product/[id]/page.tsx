@@ -19,7 +19,7 @@ type Product = {
   id: string;
   name: string;
   price: number;
-  image: string;
+  images: { id: number; url: string }[];
   stock: number;
   description: string;
   specification: string;
@@ -47,6 +47,7 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
 
         const data = JSON.parse(text);
         setProduct(data);
+        console.log(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -98,12 +99,12 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Gambar */}
             <div className="bg-white rounded-2xl shadow-md p-6">
-              <div className="w-full max-w-md h-80 bg-gray-100 rounded-lg mx-auto overflow-hidden">
+              <div className="w-48 h-48 bg-gray-100 rounded-lg mx-auto overflow-hidden">
                 <Image
-                  src={product?.image || "/fallback.jpg"}
+                  src={`http://localhost:3222${product?.images?.[0]?.url || "/fallback.jpg"}`}
                   alt={product?.name || "Product"}
-                  width={400}
-                  height={320}
+                  width={96}
+                  height={96}
                   className="w-full h-full object-cover"
                 />
               </div>
