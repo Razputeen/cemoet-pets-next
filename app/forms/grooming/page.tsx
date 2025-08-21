@@ -90,14 +90,11 @@ export default function Grooming() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!user) {
       alert("User not found!");
       return;
     }
-
     const totalPrice = selectedServices.reduce((sum, s) => sum + s.price, 0);
-
     const body = {
       petName,
       petBreed,
@@ -108,10 +105,8 @@ export default function Grooming() {
       groomIds: selectedServices.map((s) => s.id), // <- ID asli
       userIds: user.sub,
     };
-
     try {
       const token = localStorage.getItem("token");
-
       const res = await fetch("http://localhost:3222/grooming-reservation", {
         method: "POST",
         headers: {
@@ -120,11 +115,9 @@ export default function Grooming() {
         },
         body: JSON.stringify(body),
       });
-
       if (!res.ok) {
         throw new Error("Failed to submit reservation");
       }
-
       alert("Reservation booked successfully!");
       router.push(`/reservation/grooming/${user.sub}`);
     } catch (error) {

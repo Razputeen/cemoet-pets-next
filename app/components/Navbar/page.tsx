@@ -97,10 +97,10 @@ export default function Layout() {
         </a>
 
         {/* Ikon 3: ShoppingCart (Sesuai dengan kode yang Anda berikan) */}
-        <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
+        <Link href={`/product/cart/${user?.sub}`} className="text-gray-600 hover:text-gray-900 transition-colors">
           <ShoppingCart size={24} />
-        </a>
-        <Link href="/user/profile/about" className="text-gray-600 hover:text-gray-900 transition-colors">
+        </Link>
+        <Link href="/user/about" className="text-gray-600 hover:text-gray-900 transition-colors">
             <User size={24} />
         </Link>
 

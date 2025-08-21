@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, ShoppingCart, Heart, Share2 } from "lucide-react";
 import { Poppins } from "next/font/google";
 import Navbar from "#/app/components/Navbar/page";
+import { useRouter } from "next/navigation";
 
 // Font Poppins
 const poppins = Poppins({
@@ -27,16 +28,45 @@ type Product = {
   category: string;
   weight: number;
 };
+// Tipe User
+type User = {
+  sub: string;
+  Name: string;
+  email: string;
+  roles: string;
+};
 
 export default function ProductDetail({ params }: { params: { id: string } }) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
   const productId = params?.id;
+
+    useEffect(() => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/Login");
+        return;
+      }
+  
+      fetch("http://localhost:3222/auth/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Unauthorized");
+          return res.json();
+        })
+        .then((data) => setUser(data))
+        .catch(() => {
+          localStorage.removeItem("token");
+          router.push("/Login");
+        });
+    }, []);
 
   useEffect(() => {
     if (!productId) return;
-
     fetch(`http://localhost:3222/product/${productId}`, {
       method: "GET",
       cache: "no-store",
@@ -55,6 +85,37 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
         setLoading(false);
       });
   }, [productId]);
+
+const handleAddToCart = async () => {
+  if (!product || !user) return;
+
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch("http://localhost:3222/cart/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        userId: user.sub,   // ✅ tambahin userId
+        productId: product.id,
+        quantity: 1,
+      }),
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    alert("Product added to cart!");
+    router.push(`/product/cart/${user.sub}`);
+  } catch (err: any) {
+    alert(`Failed: ${err.message}`);
+  }
+};
+
+
+
 
   const formatRupiah = (value: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -127,7 +188,10 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
                 {/* Tombol Aksi */}
                 <div className="space-y-4 border-t border-gray-100 pt-6">
                   <div className="space-y-3">
-                    <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-800 transition flex items-center justify-center gap-2 text-base font-medium">
+                    <button
+                      onClick={handleAddToCart}
+                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-800 transition flex items-center justify-center gap-2 text-base font-medium"
+                    >
                       <ShoppingCart className="w-5 h-5" />
                       Add to Cart
                     </button>

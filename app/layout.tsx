@@ -3,6 +3,15 @@ import 'antd/dist/reset.css';
 import {Provider} from "./provider";
 import Script from 'next/script';
 
+
+export const metadata = {
+  title: "Cemoet Pets",
+  description: "Deskripsi singkat",
+  icons: {
+    icon: "/image/icons.png", // ganti dengan file kamu di public/
+  },
+};
+
 export default function RootLayout({
   children,
 }: {

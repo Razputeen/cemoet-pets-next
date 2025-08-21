@@ -225,18 +225,19 @@ return (
                   </div>
                 </div>
               </div>
-            {/* Ikon 2: Package (Sesuai dengan kode yang Anda berikan) */}
+              {user && (
+            <>
             <Link href="/product/order" className="text-gray-600 hover:text-gray-900 transition-colors">
               <Package size={24} />
             </Link>
-
-            {/* Ikon 3: ShoppingCart (Sesuai dengan kode yang Anda berikan) */}
-            <Link href="/product/cart" className="text-gray-600 hover:text-gray-900 transition-colors">
+            <Link href={`/product/cart/${user.sub}`} className="text-gray-600 hover:text-gray-900 transition-colors">
               <ShoppingCart size={24} />
             </Link>
             <Link href="/user/about" className="text-gray-600 hover:text-gray-900 transition-colors">
                 <User size={24} />
             </Link>
+            </>
+            )};
           </div>
         </div>
 
