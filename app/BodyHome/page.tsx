@@ -227,7 +227,7 @@ return (
               </div>
               {user && (
             <>
-            <Link href="/product/order" className="text-gray-600 hover:text-gray-900 transition-colors">
+            <Link href={`/product/order/${user.sub}`} className="text-gray-600 hover:text-gray-900 transition-colors">
               <Package size={24} />
             </Link>
             <Link href={`/product/cart/${user.sub}`} className="text-gray-600 hover:text-gray-900 transition-colors">

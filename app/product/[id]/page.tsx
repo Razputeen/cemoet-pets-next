@@ -7,6 +7,7 @@ import { ArrowLeft, ShoppingCart, Heart, Share2 } from "lucide-react";
 import { Poppins } from "next/font/google";
 import Navbar from "#/app/components/Navbar/page";
 import { useRouter } from "next/navigation";
+import PayButtonOne from "#/app/components/checkoutone/page";
 
 // Font Poppins
 const poppins = Poppins({
@@ -113,7 +114,6 @@ const handleAddToCart = async () => {
     alert(`Failed: ${err.message}`);
   }
 };
-//ddddd
 
 
 
@@ -196,9 +196,9 @@ const handleAddToCart = async () => {
                       Add to Cart
                     </button>
 
-                    <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-800 transition text-base font-medium">
-                      Buy Now
-                    </button>
+{product && (
+  <PayButtonOne productId={product.id} />
+)}
                   </div>
 
                   <div className="flex gap-3 pt-2">

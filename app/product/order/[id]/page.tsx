@@ -1,68 +1,84 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "#/components/ui/card";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import dawg from "../../image/Dawg1.jpg";
-import  Navbar  from "../../components/Navbar/page";
+import  Navbar  from "../../../components/Navbar/page";
+import { useParams } from "next/navigation";
+import Image from 'next/image';
 
-const orders = [
-  {
-    id: "#ORD-2024-001",
-    date: "Dec 15, 2024",
-    status: "Delivered",
-    items: [
-      { name: "Premium Dog Food", qty: 2, img: "../../image/Dawg1.jpg" },
-      { name: "Cat Treats", qty: 3, img: "../../image/Dawg1.jpg" },
-    ],
-    price: "$189.99",
-    shipping: "Free Shipping",
-  },
-  {
-    id: "#ORD-2024-002",
-    date: "Dec 18, 2024",
-    status: "Shipped",
-    items: [
-      { name: "Wet Dog Food", qty: 1, img: "../../image/Dawg1.jpg" },
-      { name: "Dog Chew Toys", qty: 1, img: "../../image/Dawg1.jpg" },
-    ],
-    price: "$67.49",
-    estimated: "Dec 22",
-  },
-  {
-    id: "#ORD-2024-003",
-    date: "Dec 20, 2024",
-    status: "Processing",
-    items: [
-      { name: "Premium Cat Food", qty: 1, img: "../../image/Dawg1.jpg" },
-      { name: "Cat Litter", qty: 2, img: "../../image/Dawg1.jpg" },
-    ],
-    price: "$124.99",
-  },
-  {
-    id: "#ORD-2024-004",
-    date: "Dec 21, 2024",
-    status: "Delivered",
-    items: [
-      { name: "Fish Food", qty: 1, img: "../../image/Dawg1.jpg" },
-    ],
-    price: "$29.99",
-  },
-  {
-    id: "#ORD-2024-005",
-    date: "Dec 22, 2024",
-    status: "Shipped",
-    items: [
-      { name: "Rabbit Treats", qty: 2, img: "../../image/Dawg1.jpg" },
-    ],
-    price: "$44.99",
-    estimated: "Dec 26",
-  },
-];
+
+
+interface Order {
+  id: string;
+  date: string;
+  status: string;
+  price: string;
+  cart: Cart;
+}
+
+type Cart = {
+  id: string;
+  name: string;
+  total: number;
+  items: CartItem[];
+};
+
+type CartItem = {
+  id: string;
+  quantity: number;
+  total: number;
+  product: Product;
+};
+
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  images: ProductImage[];
+  stock: number;
+  category: string;
+  brand?: string;
+  weight?: number;
+  specification?: string;
+};
+
+type ProductImage = {
+  id: number;
+  url: string;
+};
+
+
 
 export default function MyOrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const params = useParams();
+  const userId = params?.id as string;
+useEffect(() => {
+  if (!userId) return;
+  async function getOrders() {
+    const res = await fetch(`http://localhost:3222/order/user/${userId}`);
+    const data = await res.json();
+
+    // map biar sesuai sama interface Order di frontend
+    const mappedOrders = data.map((o: any) => ({
+      id: o.id,
+      date: o.createdAt || new Date().toISOString(), // fallback
+      status: o.status,
+      price: `Rp ${o.cart?.total || 0}`,
+      cart: o.cart,
+    }));
+
+    setOrders(mappedOrders);
+    console.log("🔥 Orders Mapped:", mappedOrders);
+  }
+  getOrders();
+}, [userId]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 2;
   const totalPages = Math.ceil(orders.length / itemsPerPage);
@@ -132,17 +148,24 @@ export default function MyOrdersPage() {
                   )}
                 </div>
               </div>
-              <div className="flex gap-4 mt-4">
-                {order.items.map((item, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <img src={item.img} alt="product" className="w-12 h-12 rounded" />
-                    <div>
-                      <p className="text-sm font-medium">{item.name}</p>
-                      <p className="text-xs text-gray-500">Qty: {item.qty}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+<div className="flex gap-4 mt-4">
+  {order.cart?.items?.map((item, i) => (
+    <div key={i} className="flex items-center gap-2">
+      <Image
+        src={`http://localhost:3222${item.product.images[0]?.url}`}
+        alt={item.product.name}
+        width={50}
+        height={50}
+        className="rounded-md"
+      />
+      <div>
+        <p className="text-sm font-medium">{item.product.name}</p>
+        <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+      </div>
+    </div>
+  )) ?? <p className="text-gray-400">No items</p>}
+</div>
+
               <div className="mt-4 flex justify-between items-center">
                 <p className="text-lg font-bold">{order.price}</p>
                 {order.status === "Delivered" && (
@@ -151,7 +174,7 @@ export default function MyOrdersPage() {
                 {order.status === "Shipped" && (
                   <div className="flex items-center gap-2">
                     <Button variant="secondary">Track Order</Button>
-                    <span className="text-sm text-gray-500">Estimated: {order.estimated}</span>
+                    {/* <span className="text-sm text-gray-500">Estimated: {order.estimated}</span> */}
                   </div>
                 )}
                 {order.status === "Processing" && (
