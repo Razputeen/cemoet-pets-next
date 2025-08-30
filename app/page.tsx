@@ -1,21 +1,18 @@
-"use client";
+import Navbar from "../app/Navbar/page";
+import BodyHome from "../app/guest/page";
+import { Poppins } from 'next/font/google'
 
-import React, {useEffect, useState} from 'react';
-import { render } from 'react-dom';
-import {Button, DatePicker, message} from 'antd';
-import {useRouter} from "next/navigation";
-
-export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    if(router) {
-      router.push('/home');
-    }
-  }, [router]);
-
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-poppins',
+})
+export default function Layout() {
   return (
-    <div style={{}}>
-    </div>
+    <>
+    <body className={poppins.className}>
+      <BodyHome />
+    </body>
+    </>
   );
 }

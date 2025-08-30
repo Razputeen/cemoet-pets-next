@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "#/components/ui/card";
@@ -52,7 +52,9 @@ export default function MyGroomingsPage() {
     currentPage * itemsPerPage
   );
 
-  const upcomingCount = groomings.filter(g => new Date(g.bookingDate) > new Date()).length;
+  const upcomingCount = groomings.filter(
+    (g) => new Date(g.bookingDate) > new Date()
+  ).length;
   const pastCount = groomings.length - upcomingCount;
 
   return (
@@ -61,7 +63,9 @@ export default function MyGroomingsPage() {
       <div className="p-6 bg-gray-50 min-h-screen">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-800">My Groomings</h2>
-          <p className="text-gray-500">Manage and track your grooming appointments</p>
+          <p className="text-gray-500">
+            Manage and track your grooming appointments
+          </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -94,7 +98,10 @@ export default function MyGroomingsPage() {
         </div>
 
         <div className="mb-4">
-          <Input placeholder="Search appointments..." className="w-full md:w-1/2" />
+          <Input
+            placeholder="Search appointments..."
+            className="w-full md:w-1/2"
+          />
         </div>
 
         <div className="space-y-4">
@@ -103,21 +110,30 @@ export default function MyGroomingsPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-semibold">Appointment #{groom.id.slice(0, 6)}...</h4>
+                    <h4 className="font-semibold">
+                      Appointment #{groom.id.slice(0, 6)}...
+                    </h4>
                     <p className="text-sm text-gray-500">
-                      Booked on {new Date(groom.bookingDate).toLocaleDateString()}
+                      Booked on{" "}
+                      {new Date(groom.bookingDate).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-sm">
                     {new Date(groom.bookingDate) > new Date() ? (
-                      <span className="text-blue-600 font-semibold">Upcoming</span>
+                      <span className="text-blue-600 font-semibold">
+                        Upcoming
+                      </span>
                     ) : (
-                      <span className="text-green-600 font-semibold">Completed</span>
+                      <span className="text-green-600 font-semibold">
+                        Completed
+                      </span>
                     )}
                   </div>
                 </div>
                 <div className="mt-4 space-y-1">
-                  <p className="text-sm">Pet Name: <strong>{groom.petName}</strong></p>
+                  <p className="text-sm">
+                    Pet Name: <strong>{groom.petName}</strong>
+                  </p>
                   <p className="text-sm">Breed: {groom.petBreed}</p>
                   <p className="text-sm">Age: {groom.petAge} years</p>
                   <p className="text-sm">Total Price: ${groom.totalPrice}</p>
@@ -162,7 +178,9 @@ export default function MyGroomingsPage() {
             size="icon"
             variant="outline"
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
           >
             <ChevronRight size={16} />
           </Button>

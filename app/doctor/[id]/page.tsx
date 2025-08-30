@@ -8,6 +8,7 @@ import doc from '../../image/Doc1.png'
 import { Poppins } from 'next/font/google';
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation'
 
 // Configure Poppins. You can specify weights and subsets.
 const poppins = Poppins({
@@ -26,10 +27,27 @@ type Doctor = {
   quote: string
 }
 
+type User = {
+  sub: string;
+  Name: string;
+  email: string;
+  roles: string[];
+};
+
 export default function HealthyPetPage() {
+  const [user, setUser] = useState<User | null>(null);
   const params = useParams();
+  const router = useRouter();
   const doctorId = params?.id as string;
   const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const token = localStorage.getItem("token");
+const draft = () => {
+  if (!token) {
+    router.push("/Login");
+    return false;
+  }
+  return true;
+};
 
  useEffect(() => {
     if (!doctorId) return;
@@ -48,6 +66,30 @@ export default function HealthyPetPage() {
       })
       .catch((err) => console.error("Error fetching doctor detail:", err));
   }, [doctorId]);
+
+      useEffect(() => {
+      const token = localStorage.getItem("token");
+      const draft = () => {
+        if (!token) {
+          router.push("/Login");
+          return;
+        }
+      };
+
+      fetch("http://localhost:3222/auth/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("Unauthorized");
+          return res.json();
+        })
+        .then((data) => setUser(data))
+        .catch(() => {
+          localStorage.removeItem("token");
+          router.push("/Login");
+        });
+    }, []);
+
   return(
     <div className="min-h-screen bg-[#f2f2f2] py-6 px-4">
       <div className="max-w-screen-lg mx-auto bg-white rounded-3xl shadow-md p-6">
@@ -79,6 +121,7 @@ export default function HealthyPetPage() {
                 — {doctor?.name}, {doctor?.speciality}
               </p>
               <div className="text-right mt-20">
+                {draft() && <p className="text-xs leading-relaxed font-semibold">*Please login to book an appointment</p>}
                 <Link href="/booking" className="inline-flex items-center gap-2 text-white font-bold text-lg">
                   Book Now <ArrowRight />
                 </Link>

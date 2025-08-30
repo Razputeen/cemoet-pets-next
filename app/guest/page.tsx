@@ -5,25 +5,26 @@ import { use } from "react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Leaf, Package, ReceiptText, ShoppingBag, ShoppingCart, Stethoscope, User, BookText } from "lucide-react";
-import dawgHero from "../image/dawg.png";
-import proplan from "../image/proplan.png";
-import CAds from "../image/ComponentAds1.png";
-import CAds1 from "../image/AdsH.png";
-import CAds2 from "../image/Ads2.png";
-import CAds3 from "../image/Ads3.png";
-import doc from '../image/Doc1.png'
-import docc from '../image/Cemow.jpg'
-import dawg1 from '../image/Dawg1.jpg'
-import dawg2 from '../image/Dawg2.jpg'
-import dawg3 from '../image/Dawg3.jpg'
-import dawg4 from '../image/Dawg4.jpg'
+import dawgHero from "#/app/image/dawg.png";
+import proplan from "#/app/image/proplan.png";
+import CAds from "#/app/image/ComponentAds1.png";
+import CAds1 from "#/app/image/AdsH.png";
+import CAds2 from "#/app/image/Ads2.png";
+import CAds3 from "#/app/image/Ads3.png";
+import doc from '#/app/image/Doc1.png'
+import docc from '#/app/image/Cemow.jpg'
+import dawg1 from '#/app/image/Dawg1.jpg'
+import dawg2 from '#/app/image/Dawg2.jpg'
+import dawg3 from '#/app/image/Dawg3.jpg'
+import dawg4 from '#/app/image/Dawg4.jpg'
 import { useRouter } from 'next/navigation';
 import router from "next/router";
-import ReservationDropdown from "../components/dropres/page";
+import ReservationDropdown from "#/app/components/dropres/page";
+import { Button } from "antd";
 
 const images = [doc, dawgHero, docc]
 
-export default function BodyHome() {
+export default function Landing() {
 
 type Product = {
   id: number
@@ -60,7 +61,6 @@ type Grooming = {
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [grooming, setGrooming] = useState<Grooming[]>([])
   const router = useRouter();
-
 
     useEffect(() => {
       fetch('http://localhost:3222/doctors',{
@@ -100,28 +100,6 @@ type Grooming = {
         })
         .catch(err => console.error('Error fetching product:', err))
     }, [])
-
-    // pages/dashboard.tsx
-    useEffect(() => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/guest");
-        return;
-      }
-
-      fetch("http://localhost:3222/auth/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Unauthorized");
-          return res.json();
-        })
-        .then((data) => setUser(data))
-        .catch(() => {
-          localStorage.removeItem("token");
-          router.push("/guest");
-        });
-    }, []);
 
   // Data produk contoh
   const products = [
@@ -183,10 +161,16 @@ return (
         <div className="mb-6 flex justify-between">
           <div className="flex flex-col bg-slate-100 p-4 rounded-lg">
             <h1 className="text-2xl font-bold">Welcome To Cemoet Pets</h1>
-            <p className="text-gray-700">{user?.Name}</p>
+            <p className="text-gray-700">Dear, Guest</p>
           </div>
-          <div className="flex items-center space-x-4 pr-4">
-            {/* Ikon 1: ReceiptText (Sesuai dengan kode yang Anda berikan) */}
+          <div className="flex items-center space-x-4">
+            <Link href={`/Login`}>
+              <Button className="bg-[#3D6C88] hover:bg-[#3D6C88]/90 text-white  rounded-lg">
+                Login
+              </Button>
+            </Link>
+            <div className="flex items-center space-x-4 pr-4">
+              {/* Ikon 1: ReceiptText (Sesuai dengan kode yang Anda berikan) */}
               <div className="relative inline-block text-left">
                 <button
                   className="flex items-center text-gray-600"
@@ -201,46 +185,45 @@ return (
                 </button>
                 <div className="absolute left-0 mt-2 w-40 bg-white rounded-md shadow-lg hidden dropdown">
                   <div className="py-1 text-sm text-gray-700">
-                    {user && (
                       <>
                         <Link
-                          href={`/reservation/grooming/${user.sub}`}
+                          href={`/Login`}
                           className="block px-4 py-2"
                         >
                           Grooming
                         </Link>
                         <Link
-                          href={`/reservation/klinik/${user.sub}`}
+                          href={`/Login`}
                           className="block px-4 py-2"
                         >
                           Klinik
                         </Link>
                         <Link
-                          href={`/reservation/hotel/${user.sub}`}
+                          href={`/Login`}
                           className="block px-4 py-2"
                         >
                           Hotel
                         </Link>
                       </>
-                    )}
                   </div>
                 </div>
               </div>
-              {user && (
-            <>
-            <Link href={`/product/order/${user.sub}`} className="text-gray-600 hover:text-gray-900 transition-colors">
-              <Package size={24} />
-            </Link>
-            <Link href={`/product/cart/${user.sub}`} className="text-gray-600 hover:text-gray-900 transition-colors">
-              <ShoppingCart size={24} />
-            </Link>
-            <Link href="/user/about" className="text-gray-600 hover:text-gray-900 transition-colors">
-                <User size={24} />
-            </Link>
-            </>
-            )};
+
+              <>
+              <Link href={`/Login`} className="text-gray-600 hover:text-gray-900 transition-colors">
+                <Package size={24} />
+              </Link>
+              <Link href={`/Login`} className="text-gray-600 hover:text-gray-900 transition-colors">
+                <ShoppingCart size={24} />
+              </Link>
+              <Link href="/user/about" className="text-gray-600 hover:text-gray-900 transition-colors">
+                  <User size={24} />
+              </Link>
+              </>
+            </div>
           </div>
         </div>
+        
 
         {/* Hero Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
@@ -366,7 +349,6 @@ return (
           {/* KIRI - List tetap sama seperti sebelumnya */}
           <div className="bg-[#96C6CF] w-full md:w-1/2 p-6 flex flex-col rounded-xl">
             <h2 className="text-white text-3xl font-bold mb-6 text-center">Doctor List</h2>
-
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-white scrollbar-track-transparent">
               {doctors.map((doctor) => (
               <Link href={`/doctor/${doctor.id}`} key={doctor.id} className={"no-underline"}>
@@ -378,7 +360,7 @@ return (
               ))}
             </div>
 
-              <Link href="/forms/clinic" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
+              <Link href="/Login" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
                 Book Now <ArrowRight className="mr-2" /> 
               </Link>
           </div>
@@ -464,9 +446,9 @@ return (
               ))}
             </div>
             {/* BOOK NOW */}
-                  <Link href="/home" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
-                    View All Product <ArrowRight className="mr-2" /> 
-                  </Link>
+              <Link href="/Login" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
+                Book Now <ArrowRight className="mr-2" /> 
+              </Link>
           </div>
         </div>
 
@@ -528,9 +510,9 @@ return (
             </div>
 
             {/* BOOK NOW */}
-                  <Link href="/home" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
-                    View All Product <ArrowRight className="mr-2" /> 
-                  </Link>
+              <Link href="/Login" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
+                Book Now <ArrowRight className="mr-2" /> 
+              </Link>
           </div>
         </div>
 
