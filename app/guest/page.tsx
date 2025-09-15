@@ -21,16 +21,25 @@ import { useRouter } from 'next/navigation';
 import router from "next/router";
 import ReservationDropdown from "#/app/components/dropres/page";
 import { Button } from "antd";
+import Footer from "../components/footer/page";
 
-const images = [doc, dawgHero, docc]
+const images = [doc, dawgHero]
 
 export default function Landing() {
 
 type Product = {
-  id: number
-  name: string
-  price: number
-}
+    id: number;
+    name: string;
+    price: string;
+    images: { id: number; url: string }[];
+    stock: number;
+    description: string;
+    specification: string;
+    brand: string;
+    category: string;
+    weight: number;
+    cart: cart;
+  };
 
 type User = {
   sub: string;
@@ -56,10 +65,25 @@ type Grooming = {
   specification: string;
 }
 
+type Hotel = {
+  id: number;
+  name: string;
+  price: number;
+}
+
+  type cart = {
+    id: number;
+    userId: number;
+    productId: number;
+    quantity: number;
+  }
+
   const [user, setUser] = useState<User | null>(null);
-  const [data, setData] = useState<Product[]>([])
+  const [product, setProduct] = useState<Product[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [grooming, setGrooming] = useState<Grooming[]>([])
+  const [hotel, setHotel] = useState<Hotel[]>([])
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
     useEffect(() => {
@@ -88,62 +112,42 @@ type Grooming = {
         .catch(err => console.error('Error fetching product:', err))
     }, [])
 
-    useEffect(() => {
-      fetch('http://localhost:3222/product',{
+      useEffect(() => {
+      fetch('http://localhost:3222/hotel',{
         method: 'GET',
         cache: 'no-store'
       } )
         .then(res => res.json())
         .then(json => {
           console.log("DATA DARI SERVER:", json)
-          setData(json.rows || json) // fallback jika rows tidak ada
+          setHotel(json.rows || json) // fallback jika rows tidak ada
         })
         .catch(err => console.error('Error fetching product:', err))
     }, [])
 
+    useEffect(() => {
+      const fetchProducts = async () => {
+        try {
+          const res = await fetch("http://localhost:3222/product", {
+            method: "GET",
+            cache: "no-store",
+          });
+          if (!res.ok) {
+            throw new Error("Failed to fetch products");
+          }
+          const json = await res.json();
+          setProduct(json.rows || json);
+        } catch (err) {
+          console.error("Error fetching products:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProducts();
+    }, []);
+
   // Data produk contoh
-  const products = [
-    {
-      id: 1,
-      name: "Whiskas",
-      price: "Rp 20.000",
-      image: "/image/W1.jpg",
-      rating: 4.8,
-      reviews: 234,
-      discount: "31%",
-      badge: "Best Seller",
-    },
-    {
-      id: 2,
-      name: "NaviCat",
-      price: "Rp 60.000",
-      image: "/image/W1.jpg",
-      rating: 4.8,
-      reviews: 234,
-      discount: "31%",
-      badge: "Best Seller",
-    },
-    {
-      id: 3,
-      name: "Porplan",
-      price: "Rp 20.000",
-      image: "/image/W1.jpg",
-      rating: 4.8,
-      reviews: 234,
-      discount: "31%",
-      badge: "Best Seller",
-    },
-    {
-      id: 4,
-      name: "Golden",
-      price: "Rp 20.000",
-      image: "/image/W1.jpg",
-      rating: 4.8,
-      reviews: 234,
-      discount: "31%",
-      badge: "Best Seller",
-    },
-  ];
+
     const [currentIndex, setCurrentIndex] = useState(0)
 
   useEffect(() => {
@@ -226,46 +230,44 @@ return (
         
 
         {/* Hero Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-          {/* Left 2/3 */}
-          <div className="lg:col-span-2 relative bg-[#3D6C88] rounded-xl text-white p-6 overflow-hidden flex flex-col justify-center">
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+          {/* Left Hero */}
+          <div className="lg:col-span-2 relative bg-[#3D6C88] rounded-2xl text-white p-8 overflow-hidden flex flex-col justify-center">
             <div className="z-10">
-              <h2 className="text-4xl font-bold leading-tight">
+              <h2 className="text-4xl md:text-5xl font-bold leading-tight">
                 Your<br />Everything<br />Pet Needs
               </h2>
-              <p className="text-sm mt-4 max-w-sm">
-                Premium quality food, toys, and accessories for your furry friends.
-                Because they deserve the best!
+              <p className="text-sm mt-4 max-w-xs md:max-w-sm">
+                Premium quality food, toys, and accessories for your furry friends. Because they deserve the best!
               </p>
             </div>
             <Image
-              src={dawgHero}// ganti dengan gambar anjing kamu
+              src={dawgHero}
               alt="Hero Dog"
-              width={150}
-              height={200}
-              className="absolute bottom-0 right-4 z-0"
+              width={250}
+              height={250}
+              className="absolute bottom-0 right-4 z-0 opacity-80"
             />
           </div>
 
-          {/* Right 1/3 (Promo) */}
-          <div className="bg-[#1AB1A3] text-white rounded-xl p-6 flex flex-col justify-between">
+          {/* Right Promo */}
+          <div className="bg-[#1AB1A3] text-white rounded-2xl p-8 flex flex-col justify-between">
             <div>
               <h3 className="text-2xl font-bold mb-2">Get 10% Discount</h3>
               <p className="text-sm">
-                Only for our Pro Plan dry foods and our wet ones
+                Only for our Pro Plan dry foods and our wet ones.
               </p>
             </div>
-            <div className="mt-4">
+            <div className="mt-4 flex justify-center">
               <Image
-                src={proplan} // Ganti ini juga sesuai
+                src={proplan}
                 alt="ProPlan Promo"
                 width={200}
                 height={120}
-                className="mx-auto"
               />
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -309,30 +311,66 @@ return (
             View All Product <ArrowRight className="mr-2" /> 
           </Link>
         {/* Product Card */}
-      <div className="flex justify-center gap-4 overflow-x-auto px-4 p-2">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="min-w-[250px] bg-white rounded-2xl shadow-md border-solid border-2 p-4 flex flex-col gap-3 relative"
-          >
-            <img
-              src={product.image}
-              alt={product.name}
-              className="rounded-xl object-cover w-full h-48"
-            />
-            <div className="flex flex-col gap-1">
-              <h4 className="font-normal text-[#373737] text-md">
-                {product.name}
-              </h4>
-              {/* <span className="text-xs text-gray-400 uppercase">{product.brand}</span> */}
-              <p className="text-lg font-semibold text-[#373737]">{product.price}</p>
-            </div>
-            <button className="absolute bottom-4 right-4 bg-black text-white rounded-full w-9 h-9 flex items-center justify-center hover:scale-105 transition">
-              +
-            </button>
+          <div className="px-4 md:px-8 pb-12">
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {[...Array(8)].map((_, index) => (
+                  <div key={index} className="bg-white rounded-2xl shadow-md p-4 animate-pulse">
+                    <div className="w-full h-48 bg-gray-200 rounded-xl mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {product.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative group"
+                  >
+                    {/* Use Link to wrap the image and product info for easy navigation */}
+                    <Link href={`/product/${product.id}`} passHref>
+                      <div className="relative w-full h-48 cursor-pointer">
+                        <Image
+                          src={`http://localhost:3222${product.images?.[0]?.url || "/fallback.jpg"}`}
+                          alt={product.name}
+                          layout="fill"
+                          objectFit="cover"
+                          className="rounded-t-2xl transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                      
+                      <div className="p-4 flex flex-col gap-2">
+                        <h4 className="font-semibold text-gray-900 text-lg">
+                          {product.name}
+                        </h4>
+                        <h4 className="text-sm text-gray-500 uppercase font-medium">
+                          {product.weight} Kg
+                        </h4>
+                        <div className="mt-2 flex items-center justify-between">
+                          <p className="text-xl font-bold text-gray-800">
+                            {product.price}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                    
+                    {/* Add to Cart Button is outside the Link, so it's a separate click target */}
+                    <div className="p-4 pt-0">
+                      <Link
+                        href={`/Login`}
+                        className="w-full mt-2 bg-[#3A3A3A] text-white font-medium py-2 rounded-lg flex items-center justify-center gap-2 transition-all duration-300 hover:bg-gray-700 hover:scale-105"
+                      >
+                        Add to Cart
+                        <ShoppingCart size={18} />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        ))}
-      </div>
         
         {/* Ads 2 */}
         <div className="pt-24 r max-w-screen-xl mx-auto">
@@ -345,22 +383,28 @@ return (
         </div>
 
         {/* Doctor */}
-        <div className="flex flex-col md:flex-row gap-6 overflow-hidden max-w-[1200px] mx-auto mt-10 h-[70vh]">
+        <div className="flex flex-col md:flex-row gap-6 overflow-hidden max-w-[1200px] mx-auto mt-10 h-[100vh]">
           {/* KIRI - List tetap sama seperti sebelumnya */}
           <div className="bg-[#96C6CF] w-full md:w-1/2 p-6 flex flex-col rounded-xl">
-            <h2 className="text-white text-3xl font-bold mb-6 text-center">Doctor List</h2>
+            {/* <h2 className="text-white text-3xl font-bold mb-6 text-center">Doctor List</h2> */}
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-white scrollbar-track-transparent">
-              {doctors.map((doctor) => (
-              <Link href={`/doctor/${doctor.id}`} key={doctor.id} className={"no-underline"}>
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow-md text-sm leading-tight">
-                  <p className="font-semibold text-[#373737]">{doctor.name}</p>
-                  <p className="font-bold text-[#373737]">{doctor.speciality}</p>
+            <div className="bg-[#ffffff] text-[#373737] rounded-xl p-6">
+              <h2 className="text-2xl font-bold mb-4 text-center">Healthy Pets</h2>
+                <p className="text-xs leading-relaxed font-semibold">
+                To ensure a pet's health, provide a balanced diet, fresh water, and consistent exercise, along with regular veterinary check-ups, vaccinations, and parasite control. Maintaining good hygiene by washing hands after handling pets and their waste is crucial to prevent the spread of diseases to humans. Keeping pets on leashes and securing garbage also helps protect them from wildlife and illness. 
+              </p>
+              <div className="text-right mt-20">
+              </div>
+            </div>
+            {doctors.map((doc) => (
+                <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow-md text-sm leading-tight">
+                  <p className="font-semibold text-[#373737]">{doc.name}</p>
+                  <p className="font-bold text-[#373737]">{doc.speciality}</p>
                 </div>
-              </Link>
-              ))}
+            ))}
             </div>
 
-              <Link href="/Login" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
+              <Link href="/forms/clinic" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
                 Book Now <ArrowRight className="mr-2" /> 
               </Link>
           </div>
@@ -418,13 +462,13 @@ return (
 
             {/* Tabs */}
             <div className="flex justify-center gap-3 mb-6">
-              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-lg shadow">
                 Normal Wash
               </button>
-              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-lg shadow">
                 Fungal Wash
               </button>
-              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
+              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-lg shadow">
                 Fleas Wash
               </button>
             </div>
@@ -446,7 +490,7 @@ return (
               ))}
             </div>
             {/* BOOK NOW */}
-              <Link href="/Login" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
+              <Link href="/forms/grooming" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
                 Book Now <ArrowRight className="mr-2" /> 
               </Link>
           </div>
@@ -474,79 +518,34 @@ return (
 
           {/* RIGHT - CHECKUP FORM */}
           <div className="bg-[#5E8AD8] w-full md:w-1/2 p-6 flex flex-col rounded-xl">
-            <h2 className="text-white text-3xl font-bold mb-6 text-center">Checkup Form</h2>
-
-            {/* Tabs */}
-            <div className="flex justify-center gap-3 mb-6">
-              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
-                Normal Wash
-              </button>
-              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
-                Fungal Wash
-              </button>
-              <button className="bg-white text-[#373737] font-semibold px-5 py-2 rounded-full shadow">
-                Fleas Wash
-              </button>
-            </div>
 
             {/* List Items */}
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-white scrollbar-track-transparent">
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash</p>
-                <p className="font-bold text-[#373737]">75K</p>
+            <div className="bg-[#ffffff] text-[#373737] rounded-xl p-6">
+              <h2 className="text-2xl font-bold mb-4 text-center">Pet Hotel</h2>
+                <p className="text-xs leading-relaxed font-semibold">
+                A pet hotel is a high-class boarding facility offering comfortable, often cage-free accommodations, amenities like play areas, pools, spas, and grooming services, and individualized attention for pets while their owners are away. Unlike traditional kennels, pet hotels provide a luxurious, resort-style experience designed to keep pets safe, happy, and engaged through supervised play, personalized activities, and high-quality food and bedding.
+              </p>
+              <div className="text-right mt-20">
               </div>
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser</p>
-                <p className="font-bold text-[#373737]">75K</p>
-              </div>
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Sebazol</p>
-                <p className="font-bold text-[#373737]">75K</p>
-              </div>
-              <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow text-sm leading-tight whitespace-pre-wrap">
-                <p className="font-semibold text-[#373737]">Anti Fungal Wash{'\n'}+Degreaser{'\n'}+Sebazol</p>
-                <p className="font-bold text-[#373737]">75K</p>
-              </div>
+            </div>
+            {hotel.map((hotel) => (
+                <div className="bg-white px-4 py-3 rounded-xl flex justify-between items-start text-left shadow-md text-sm leading-tight">
+                  <p className="font-semibold text-[#373737]">{hotel.name}</p>
+                  <p className="font-bold text-[#373737]">{hotel.price}K</p>
+                </div>
+            ))}
             </div>
 
             {/* BOOK NOW */}
-              <Link href="/Login" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
+              <Link href="/forms/hotel" className="flex text-[#373737] font-bold text-xl self-end no-underline pt-6">
                 Book Now <ArrowRight className="mr-2" /> 
               </Link>
           </div>
         </div>
 
         {/* Footer */}
-        <footer className="bg-white shadow-xl rounded-2xl p-14 mt-40 max-w-7xl mx-auto pb-36">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-8">
-            {/* Left */}
-            <div className="flex-1 text-[#373737] space-y-2">
-              <h1 className="text-3xl font-bold text-[#373737]">Cemoet Pets</h1>
-              <p className="font-semibold text-[#373737]">PT. Dignitas Akademi</p>
-              <p className="text-sm text-[#373737]">
-                Jl. Bungur Raya No.20, Kukusan, Kecamatan Beji, Kota Depok, Jawa Barat 16425
-              </p>
-              <p className="text-sm text-[#373737]">
-                Pusat Kebutuhan Hewan Peliharaan Terlengkap, Terbesar,
-                <br /> & Terpercaya No. 1 di Indonesia
-              </p>
-            </div>
-
-            {/* Right */}
-            <div className="flex-1 text-right flex flex-col items-end gap-3">
-              <div className="flex gap-6 font-semibold">
-                <a href="#" className="hover:underline no-underline text-[#373737]">Home</a>
-                <a href="#" className="hover:underline no-underline text-[#373737]">Products</a>
-                <a href="#" className="hover:underline no-underline text-[#373737]">Doctors</a>
-                <a href="#" className="hover:underline no-underline text-[#373737]">Grooming</a>
-                <a href="#" className="hover:underline no-underline text-[#373737]">Hotel</a>
-              </div>
-              <p className="text-xs max-w-sm text-gray-600 text-right mt-2">
-                ©2025 Cemoet Corporation. Cemoet, the cemoet healthy pet shop are among our registered and unregistered trademarks in the IDN and other countries.
-              </p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </div>
   )

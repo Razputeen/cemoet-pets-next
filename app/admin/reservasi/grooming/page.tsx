@@ -6,7 +6,7 @@ import Link from "next/link";
 import { PlusIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import SidebarAdmin from "#/app/components/sidebar/page";
 import { CardContent } from "#/components/ui/card";
-import { Card } from "antd";
+import { Card,Segmented } from "antd";
 
 type GroomingReservation = {
   id: string;
@@ -65,13 +65,11 @@ export default function AdminGroomList() {
   );
 
   return (
-    <div className="max-w-screen-2xl mx-auto bg-[#f2f2f2] p-4 py-9">
-      <div className="min-h-screen bg-white px-4 rounded-3xl shadow-md p-4 flex flex-col md:flex-row gap-2">
-        <SidebarAdmin />
+    <div className="max-w-screen-2xl mx-auto p-4 py-9">
+
 
         <div className="flex-1 max-w-screen mx-auto bg-white p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold bg-slate-100 p-2 rounded-lg">Grooming Reservations</h2>
             <Link href="/admin/groom/create">
               <PlusIcon className="w-6 h-6 text-blue-600 hover:text-blue-800 cursor-pointer" />
             </Link>
@@ -113,7 +111,6 @@ export default function AdminGroomList() {
               </CardContent>
             </Card>
           </div>
-
           <div className="bg-white rounded shadow overflow-x-auto">
             <table className="min-w-full text-sm text-left">
               <thead className="bg-gray-100 text-gray-700">
@@ -193,6 +190,5 @@ export default function AdminGroomList() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

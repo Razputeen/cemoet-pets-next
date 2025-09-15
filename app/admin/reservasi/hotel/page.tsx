@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SidebarAdmin from "#/app/components/sidebar/page";
 import { CardContent } from "#/components/ui/card";
-import { Card , Segmented} from "antd";
+import { Card,Segmented } from "antd";
 import { Poppins } from "next/font/google";
 
 const poppins = Poppins({
@@ -15,20 +15,20 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
-type ClinicRepository = {
-  id: number;
+type hotelRes = {
+  id: string;
   petName: string;
   petBreed: string;
   petAge: number;
   petType: string;
   appointmentDate: Date | string;
   status: string;
-  description: string;
+  amountDays: Date;
   user: User;
-  clinics: ClinicRepository[];
+  hotel: Hotel;
 };
 
-type Clinic = {
+type Hotel = {
   id: number;
   name: string;
   specification: string;
@@ -43,21 +43,21 @@ type User = {
   phoneNum: string;
 };
 
-export default function AdminClinicList() {
-  const [clinicRes, setClinicRes] = useState<ClinicRepository[]>([]);
+export default function AdminHotelList() {
+  const [hotelRes, setHotelRes] = useState<hotelRes[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const router = useRouter();
 
   useEffect(() => {
-    fetch("http://localhost:3222/clinic")
+    fetch("http://localhost:3222/hotel-res")
       .then((res) => res.json())
       .then((data) => {
         console.log("Raw data from API:", data);
         if (Array.isArray(data)) {
-          console.log("Sample clinic data:", data[0]);
-          setClinicRes(data);
+          console.log("Sample hotel data:", data[0]);
+          setHotelRes(data);
         } else {
           console.error("Expected array but got:", data);
         }
@@ -96,9 +96,9 @@ export default function AdminClinicList() {
 
   // ✅ Update status dengan konversi yang benar
   // ✅ Gunakan endpoint PATCH untuk update status (lebih efisien)
-  const handleStatusChange = async (clinicId: number, selectValue: string) => {
+  const handleStatusChange = async (hotelResId: string, selectValue: string) => {
     console.log("=== DEBUG STATUS UPDATE ===");
-    console.log("Clinic ID:", clinicId, "Type:", typeof clinicId);
+    console.log("Clinic ID:", hotelResId, "Type:", typeof hotelResId);
     console.log("Select Value:", selectValue);
 
     const statusForAPI = getStatusFromValue(selectValue);
@@ -109,7 +109,7 @@ export default function AdminClinicList() {
 
     try {
       // ✅ Gunakan PATCH endpoint untuk status
-      const url = `http://localhost:3222/clinic/${clinicId}/status`;
+      const url = `http://localhost:3222/hotel-res/${hotelResId}/status`;
       console.log("Sending request to:", url);
 
       const response = await fetch(url, {
@@ -135,30 +135,30 @@ export default function AdminClinicList() {
           console.log("Response is not JSON");
         }
 
-        setClinicRes((prevData) =>
-          prevData.map((clinic) =>
-            clinic.id === clinicId
-              ? { ...clinic, status: statusForAPI }
-              : clinic
+        setHotelRes((prevData) =>
+          prevData.map((hotelres) =>
+            hotelres.id === hotelResId
+              ? { ...hotelres, status: statusForAPI }
+              : hotelres
           )
         );
         console.log("✅ Status updated successfully");
       } else {
         console.error("❌ Failed to update:", responseText);
         // ✅ Fallback ke PUT jika PATCH gagal
-        await handleStatusChangeWithPUT(clinicId, selectValue);
+        await handleStatusChangeWithPUT(hotelResId, selectValue);
       }
     } catch (error) {
       console.error("❌ Error updating status:", error);
       // ✅ Fallback ke PUT jika ada error
-      await handleStatusChangeWithPUT(clinicId, selectValue);
+      await handleStatusChangeWithPUT(hotelResId, selectValue);
     }
     console.log("=== END DEBUG ===");
   };
 
   // ✅ Fallback function menggunakan PUT
   const handleStatusChangeWithPUT = async (
-    clinicId: number,
+    hotelResId: string,
     selectValue: string
   ) => {
     console.log("=== FALLBACK PUT METHOD ===");
@@ -167,7 +167,7 @@ export default function AdminClinicList() {
     const requestBody = { status: statusForAPI };
 
     try {
-      const response = await fetch(`http://localhost:3222/clinic/${clinicId}`, {
+      const response = await fetch(`http://localhost:3222/hotel-res/${hotelResId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -180,11 +180,11 @@ export default function AdminClinicList() {
       console.log("PUT Response text:", responseText);
 
       if (response.ok) {
-        setClinicRes((prevData) =>
-          prevData.map((clinic) =>
-            clinic.id === clinicId
-              ? { ...clinic, status: statusForAPI }
-              : clinic
+        setHotelRes((prevData) =>
+          prevData.map((hotelres) =>
+            hotelres.id === hotelResId
+              ? { ...hotelres, status: statusForAPI }
+              : hotelres
           )
         );
         console.log("✅ Status updated via PUT successfully");
@@ -197,13 +197,13 @@ export default function AdminClinicList() {
   };
 
   // ✅ Hitung statistik dengan benar
-  const notReadyCount = clinicRes.filter(
+  const notReadyCount = hotelRes.filter(
     (c) => c.status === "Not Ready"
   ).length;
-  const readyCount = clinicRes.filter((c) => c.status === "Ready").length;
-  const pastCount = clinicRes.filter((c) => c.status === "Completed").length;
-  const totalPages = Math.ceil(clinicRes.length / itemsPerPage);
-  const paginatedData = clinicRes.slice(
+  const readyCount = hotelRes.filter((c) => c.status === "Ready").length;
+  const pastCount = hotelRes.filter((c) => c.status === "Completed").length;
+  const totalPages = Math.ceil(hotelRes.length / itemsPerPage);
+  const paginatedData = hotelRes.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -213,14 +213,13 @@ export default function AdminClinicList() {
       <div
         className={`${poppins.className} max-w-screen-2xl mx-auto p-4 py-9`}
       >
-
           <div className="flex-1 max-w-screen mx-auto bg-white p-6">
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <Card>
                 <CardContent className="p-4">
                   <p className="text-gray-500">Total Appointments</p>
-                  <p className="text-2xl font-bold">{clinicRes.length}</p>
+                  <p className="text-2xl font-bold">{hotelRes.length}</p>
                 </CardContent>
               </Card>
               <Card className="bg-blue-300">
@@ -257,20 +256,20 @@ export default function AdminClinicList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedData.map((clinic) => (
-                    <tr key={clinic.id} className="border-t">
+                  {paginatedData.map((hotel) => (
+                    <tr key={hotel.id} className="border-t">
                       <td className="px-4 py-2 font-semibold">
-                        {clinic.user.Name}
+                        {hotel.user.Name}
                       </td>
                       <td className="px-4 py-2 font-semibold text-gray-500">
-                        {clinic.petName}
+                        {hotel.petName}
                       </td>
                       <td className="px-4 py-2">
-                        {new Date(clinic.appointmentDate).toLocaleDateString()}
+                        {new Date(hotel.appointmentDate).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-2">
                         <Link
-                          href={`/admin/reservasi/clinic/detail/${clinic.id}`}
+                          href={`/admin/reservasi/hotel/detail/${hotel.id}`}
                           className="text-blue-600 hover:underline"
                         >
                           View
@@ -279,9 +278,9 @@ export default function AdminClinicList() {
                       <td className="px-4 py-2">
                         {/* ✅ Gunakan konversi yang benar */}
                         <select
-                          value={getStatusValue(clinic.status)}
+                          value={getStatusValue(hotel.status)}
                           onChange={(e) =>
-                            handleStatusChange(clinic.id, e.target.value)
+                            handleStatusChange(hotel.id, e.target.value)
                           }
                           className="border border-gray-300 rounded px-2 py-1 text-sm
              focus:outline-none focus:ring-2 focus:ring-blue-500

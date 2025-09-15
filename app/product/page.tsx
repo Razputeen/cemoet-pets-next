@@ -2,119 +2,106 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import Header from "../image/Component50.png";
 import { Poppins } from "next/font/google";
-import Navbar from "../components/Navbar/page";
-import { useEffect, useState } from "react";
 import { ShoppingCart } from "lucide-react";
-import be from "zod/v4/locales/be.cjs";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import jwtDecode from 'jwt-decode';
-// Setup Poppins
+import Header from "../image/Component50.png";
+import Navbar from "../components/Navbar/page";
+import { Input } from "antd";
+
+// Setup Poppins font
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-poppins",
 });
 
+// Define types
+type Product = {
+  id: number;
+  name: string;
+  price: string;
+  images: { id: number; url: string }[];
+  stock: number;
+  description: string;
+  specification: string;
+  brand: string;
+  category: string;
+  weight: number;
+};
 
+type User = {
+  sub: string;
+  Name: string;
+  email: string;
+  roles: string;
+};
 
 export default function ProductListPage() {
-  const [product, setProduct] = useState<products[]>([])
-  const [user, setUser] = useState<user | null>(null)
-  const router = useRouter()
-  type products = {
-    id: number;
-    name: string;
-    price: string;
-    images: { id: number; url: string }[];
-    stock: number;
-    description: string;
-    specification: string;
-    brand: string;
-    category: string;
-    weight: number;
-    cart: cart;
-  };
+  const [products, setProducts] = useState<Product[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+  const router = useRouter();
 
-  type user = {
-    sub: string;
-    Name: string;
-    email: string;
-    roles: string;
-  };
-
-  type cart = {
-    id: number;
-    userId: number;
-    productId: number;
-    quantity: number;
-  }
-
-      useEffect(() => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/Login");
-        return;
-      }
-  
-      fetch("http://localhost:3222/auth/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Unauthorized");
-          return res.json();
-        })
-        .then((data) => setUser(data))
-        .catch(() => {
-          localStorage.removeItem("token");
-          router.push("/Login");
-        });
-    }, []);
-
-    useEffect(() => {
-      fetch('http://localhost:3222/product',{
-        method: 'GET',
-        cache: 'no-store'
-      } )
-        .then(res => res.json())
-        .then(json => {
-          console.log("DATA DARI SERVER:", json)
-          setProduct(json.rows || json) // fallback jika rows tidak ada
-        })
-        .catch(err => console.error('Error fetching product:', err))
-    }, [])
-
-
-// const handleAddToCart = async () => {
-//   const token = localStorage.getItem("token");
-//   const userId = user; // atau field lain sesuai JWT-mu
-
-//   await fetch('http://localhost:3222/cart/add', {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body: JSON.stringify({
-//       productId: 1,
-//       quantity: 1,
-//       userId: userId
-//     }),
-//   });
-// };
-
-  const handleAddToCart = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) {
-      alert("User not found!");
+  // ✅ Fetch user
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/Login");
       return;
     }
-    const body = {
-      productId: product[0].id,
-      quantity: 1,
-      userIds: user.sub,
+
+    const fetchUserProfile = async () => {
+      try {
+        const res = await fetch("http://localhost:3222/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Unauthorized");
+        const data = await res.json();
+        setUser(data);
+      } catch (err) {
+        console.error("Failed to fetch user profile:", err);
+        localStorage.removeItem("token");
+        router.push("/Login");
+      }
     };
+    fetchUserProfile();
+  }, [router]);
+
+  // ✅ Fetch products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("http://localhost:3222/product", {
+          method: "GET",
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error("Failed to fetch products");
+        const json = await res.json();
+        setProducts(json.rows || json);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // ✅ Add to Cart
+  const handleAddToCart = async (productId: number) => {
+    if (!user) {
+      alert("Please log in first.");
+      router.push("/Login");
+      return;
+    }
+
+    const body = { productId, quantity: 1, userIds: user.sub };
+
     try {
       const token = localStorage.getItem("token");
       const res = await fetch("http://localhost:3222/cart/add", {
@@ -125,103 +112,152 @@ export default function ProductListPage() {
         },
         body: JSON.stringify(body),
       });
-      if (!res.ok) {
-        throw new Error("Failed to add to cart");
-      }
-      alert("Product added to cart successfully!");
-      // router.push(`/product/cart/${user.sub}`);
+      if (!res.ok) throw new Error("Failed to add to cart");
+      alert("Product added to cart!");
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong while booking");
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      console.log("Body to be sent:", body);
+      console.error("Error adding to cart:", error);
+      alert("Something went wrong while adding the product.");
     }
   };
 
+  // ✅ Filter + Pagination
+  const filteredProducts = products.filter(
+    (h) =>
+      h.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      h.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      h.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // ✅ Reset ke page 1 kalau search berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   return (
     <>
       <Navbar />
       <main
-        className={` ${poppins.variable} min-h-screen bg-white flex flex-col font-sans`}
+        className={`${poppins.variable} min-h-screen bg-gray-50 flex flex-col font-sans`}
       >
-        {/* Hero Section */}
-        <section className="rounded-xl mx-8 my-6 overflow-hidden">
+        {/* Hero */}
+        <section className="mx-4 md:mx-8 my-6 rounded-2xl overflow-hidden shadow-lg">
           <Image
             src={Header}
             alt="Yummy Treats Banner"
             width={1400}
             height={250}
-            className="w-full object-cover"
+            className="w-full h-40 md:h-64 object-cover"
           />
         </section>
 
-        {/* Filter Bar */}
-        <section className="flex flex-wrap gap-2 px-8 mb-8">
-          {["Cat Toys", "Price", "Review", "Color", "Material", "Offer"].map(
-            (filter) => (
-              <a
-                key={filter}
-                className="px-4 py-2 bg-gray-100 rounded-full text-sm"
-              >
-                {filter} ▼
-              </a>
-            )
-          )}
-        </section>
+        {/* Search */}
+        <div className="px-4 md:px-8 mb-6">
+          <Input
+            placeholder="Search product by name, brand, or category..."
+            className="w-full md:w-full p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
 
-        {/* Product Grid */}
-        {/* Product Grid */}
-        {/* Product Card */}
-      <div className="flex justify-center gap-4 overflow-x-auto px-4 p-2">
-        {product.map((product) => (
-
-          <div
-            key={product.id}
-            className="min-w-[250px] bg-white rounded-2xl shadow-md border-solid border-2 p-4 flex flex-col gap-3 relative"
-          >
-          <Link key={product.id} href={`/product/${product.id}`}>
-            <img
-              src={`http://localhost:3222${product?.images?.[0]?.url || "/fallback.jpg"}`}
-              alt={product.name}
-              className="rounded-xl object-cover w-full h-48"
-            />
-            
-            <div className="flex flex-col gap-1">
-              <h4 className="font-normal text-[#373737] text-md">
-                {product.name}
-              </h4>
-              <h4 className="text-xs text-gray-400 uppercase">{product.weight}Kg  </h4>
-              {/* <span className="text-xs text-gray-400 uppercase">{product.brand}</span> */}
-              <p className="text-lg font-semibold text-[#373737]">{product.price}</p>
+        {/* Grid */}
+        <div className="px-4 md:px-8 pb-12">
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {[...Array(8)].map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-2xl shadow-md p-4 animate-pulse"
+                >
+                  <div className="w-full h-48 bg-gray-200 rounded-xl mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))}
             </div>
+          ) : (
+            <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 ${poppins.className}`}>
+              {paginatedProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative group"
+                >
+                  {/* Product Link */}
+                  <Link href={`/product/${product.id}`} passHref>
+                    <div className="relative w-full h-48 cursor-pointer">
+                      <Image
+                        src={`http://localhost:3222${product.images?.[0]?.url || "/fallback.jpg"}`}
+                        alt={product.name}
+                        layout="fill"
+                        objectFit="cover"
+                        className="rounded-t-2xl transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
 
-            </Link>
-            <button onClick={handleAddToCart} className="absolute bottom-4 right-4 bg-[#373737] text-white rounded-full w-9 h-9 flex items-center justify-center hover:scale-105 transition">
-              <ShoppingCart className="w-4 h-4" />
-            </button>
-          </div>
+                    <div className="p-4 flex flex-col gap-2">
+                      <h4 className="font-semibold text-gray-900 text-lg">
+                        {product.name}
+                      </h4>
+                      <h4 className="text-sm text-gray-500 uppercase font-medium">
+                        {product.weight} Kg
+                      </h4>
+                      <div className="mt-2 flex items-center justify-between">
+                        <p className="text-xl font-bold text-gray-800">
+                          {product.price}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
 
-        ))}
-      </div>
+                  {/* Add to Cart */}
+                  <div className="p-4 pt-0">
+                    <button
+                      onClick={() => handleAddToCart(product.id)}
+                      className="w-full mt-2 bg-[#3A3A3A] text-white font-medium py-2 rounded-lg flex items-center justify-center gap-2 transition-all duration-300 hover:bg-gray-700 hover:scale-105"
+                    >
+                      Add to Cart
+                      <ShoppingCart size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Pagination */}
-        <div className="flex justify-center gap-2 mb-12">
-          <button className="px-3 py-1 border border-gray-300 rounded">
+        <div className="flex justify-center items-center gap-2 mb-12">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="px-4 py-2 bg-white text-gray-700 rounded-lg border border-gray-300 shadow-sm hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Prev
           </button>
-          {[1, 2, 3, 4, 5, 6, 7].map((page) => (
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
-              className={`px-3 py-1 border ${
-                page === 1
-                  ? "bg-purple-200 border-purple-400"
-                  : "border-gray-300"
-              } rounded`}
+              onClick={() => setCurrentPage(page)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                page === currentPage
+                  ? "bg-gray-800 text-white shadow-lg"
+                  : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
+              }`}
             >
               {page}
             </button>
           ))}
-          <button className="px-3 py-1 border border-gray-300 rounded">
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="px-4 py-2 bg-white text-gray-700 rounded-lg border border-gray-300 shadow-sm hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Next
           </button>
         </div>

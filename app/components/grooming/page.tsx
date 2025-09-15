@@ -12,11 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 
-const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-poppins',
-});
+
 
   type User = {
   sub: string;
@@ -163,57 +159,8 @@ export default function Grooming() {
 
 
   return (
-    <body className={poppins.className}>
-      <Navbar />
-      <div className="min-h-screen bg-[#f8f9fb] flex flex-col items-center px-4 py-10">
-        <h1 className="text-3xl font-bold text-center mb-2 text-[#374151]">
-          Book Your Pet’s Appointment
-        </h1>
-        <p className="text-[#374151] text-center mb-6">
-          Schedule grooming services for your beloved pet
-        </p>
-
-        <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-md w-full max-w-3xl border">
-          {/* Tabs */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <Link href="/forms/clinic" className="no-underline flex-1">
-              <div className={unusedService}>
-                <div className="text-2xl mb-1">🩺</div>
-                <div className="font-semibold">Veterinary Care</div>
-                <div className="text-xs">Health checkups, treatments, and medical care</div>
-              </div>
-            </Link>
-            <Link href="/forms/grooming" className="no-underline flex-1">
-              <div className={usedService}>
-                <div className="text-2xl mb-1">✂️</div>
-                <div className="font-semibold">Grooming</div>
-                <div className="text-xs">Professional grooming and styling services</div>
-              </div>
-            </Link>
-            <Link href="/forms/hotel" className="no-underline flex-1">
-              <div className={unusedService}>
-                <div className="text-2xl mb-1">🏨</div>
-                <div className="font-semibold">Pet Hotel</div>
-                <div className="text-xs">Comfortable boarding and overnight care</div>
-              </div>
-            </Link>
-          </div>
-
-          {/* Form */}
+    <div className="">
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* <div>
-              <label htmlFor="ownerName" className="text-sm font-semibold block mb-1">
-                Owner Name
-              </label>
-              <input type="text" id="ownerName" placeholder={user?.Name} className={input} readOnly />
-            </div> */}
-
-            {/* <div>
-              <label htmlFor="phoneNumber" className="text-sm font-semibold block mb-1">
-                Phone Number
-              </label>
-              <input type="text" id="phoneNumber" placeholder="Phone Number" className={input} />
-            </div> */}
 
             {/* Owner Info */}
             <div className="col-span-1 md:col-span-2">
@@ -318,8 +265,6 @@ export default function Grooming() {
               </button>
             </div>
           </form>
-        </div>
-      </div>
-    </body>
+    </div>
   );
 }

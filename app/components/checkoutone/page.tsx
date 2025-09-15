@@ -48,7 +48,7 @@ export default function PayButtonOne({ productId }: { productId: string }) {
   return (
     <button
       onClick={handlePay}
-      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-800 transition text-base font-medium"
+      className="w-full bg-[#286699] hover:bg-[#194E7A] text-white py-3 rounded-lg transition text-base font-medium"
     >
       Bayar Sekarang
     </button>

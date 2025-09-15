@@ -4,19 +4,24 @@ import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "#/components/ui/card";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
-import { ChevronLeft, ChevronRight, Stethoscope, PawPrint, Calendar, Clock, CheckCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, PawPrint, Hotel, Calendar, Clock, DollarSign, CheckCircle } from "lucide-react";
 import Navbar from "../../../components/Navbar/page";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
-type Clinic = {
+type HotelRes = {
   id: string;
   petName: string;
   petType: string;
   petBreed: string;
   petAge: string;
   appointmentDate: string;
-  description: string;
+  amountDays: number;
+  hotel: {
+    id: number;
+    name: string;
+    price: number;
+  };
   status: "Not Ready" | "Ready" | "Completed";
 };
 
@@ -25,17 +30,17 @@ type User = {
   Name: string;
   email: string;
   phoneNum: string;
-  clinic: Clinic[];
+  hotelres: HotelRes[];
   role: { id: string; name: string };
 };
 
-export default function MyClinicPage() {
+export default function MyHotelPage() {
   const params = useParams();
   const userId = params?.id as string;
   const [user, setUser] = useState<User>();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const itemsPerPage = 3; // Changed to 3 for better list density
+  const [itemsPerPage, setItemsPerPage] = useState(5);// Changed to 3 for better list density
   const router = useRouter();
 
   useEffect(() => {
@@ -47,6 +52,7 @@ export default function MyClinicPage() {
         const response = await fetch(`http://localhost:3222/users/${userId}`);
         const data = await response.json();
         setUser(data.data);
+        console.log(data.data);
       } catch (error) {
         console.error("Failed to fetch user data:", error);
       }
@@ -54,17 +60,17 @@ export default function MyClinicPage() {
     fetchUser();
   }, [userId]);
 
-  const clinic = user?.clinic ?? [];
+  const hotelReservations = user?.hotelres ?? [];
 
-  const filteredClinic = clinic.filter(
-    (c) =>
-      c.petName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.petType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.petBreed.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredHotelRes = hotelReservations.filter(
+    (h) =>
+      h.petName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      h.petType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      h.petBreed.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredClinic.length / itemsPerPage);
-  const paginatedClinic = filteredClinic.slice(
+  const totalPages = Math.ceil(filteredHotelRes.length / itemsPerPage);
+  const paginatedHotelRes = filteredHotelRes.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -82,9 +88,19 @@ export default function MyClinicPage() {
     }
   };
 
-  const notReadyCount = clinic.filter((c) => c.status === "Not Ready").length;
-  const readyCount = clinic.filter((c) => c.status === "Ready").length;
-  const completedCount = clinic.filter((c) => c.status === "Completed").length;
+  const notReadyCount = hotelReservations.filter((h) => h.status === "Not Ready").length;
+  const readyCount = hotelReservations.filter((h) => h.status === "Ready").length;
+  const completedCount = hotelReservations.filter((h) => h.status === "Completed").length;
+
+  const formatRupiah = (price: number) => {
+    return `Rp ${price.toLocaleString('id-ID')}`;
+  };
+
+  const calculateTotalPrice = (res: HotelRes) => {
+    return res.amountDays * (res.hotel?.price || 0);
+  };
+
+  const totalSpent = hotelReservations.reduce((sum, res) => sum + calculateTotalPrice(res), 0);
 
   return (
     <>
@@ -92,9 +108,9 @@ export default function MyClinicPage() {
       <div className="p-6 md:p-12 bg-gray-100 min-h-screen">
         <div className="max-w-screen-xl mx-auto">
           <header className="mb-8">
-            <h1 className="text-4xl font-extrabold text-gray-900">My Clinic Appointments</h1>
+            <h1 className="text-4xl font-extrabold text-gray-900">My Pet Hotel Bookings</h1>
             <p className="text-lg text-gray-600 mt-2">
-              Manage and track your pet's veterinary clinic appointments.
+              Manage and track your pet's hotel reservations.
             </p>
           </header>
 
@@ -102,11 +118,11 @@ export default function MyClinicPage() {
             <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-6 flex items-center gap-4">
                 <div className="p-3 bg-sky-100 rounded-full">
-                  <Stethoscope size={24} className="text-sky-600" />
+                  <Hotel size={24} className="text-sky-600" />
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Total Appointments</p>
-                  <p className="text-3xl font-bold text-gray-800 mt-1">{clinic.length}</p>
+                  <p className="text-gray-500 text-sm">Total Bookings</p>
+                  <p className="text-3xl font-bold text-gray-800 mt-1">{hotelReservations.length}</p>
                 </div>
               </CardContent>
             </Card>
@@ -134,12 +150,14 @@ export default function MyClinicPage() {
             </Card>
             <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardContent className="p-6 flex items-center gap-4">
-                <div className="p-3 bg-green-100 rounded-full">
-                  <CheckCircle size={24} className="text-green-600" />
+                <div className="p-3 bg-purple-100 rounded-full">
+                  <DollarSign size={24} className="text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Completed</p>
-                  <p className="text-3xl font-bold text-gray-800 mt-1">{completedCount}</p>
+                  <p className="text-gray-500 text-sm">Total Spent</p>
+                  <p className="text-xl font-bold text-purple-600 mt-1">
+                    {formatRupiah(totalSpent)}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -147,7 +165,7 @@ export default function MyClinicPage() {
 
           <div className="mb-6">
             <Input
-              placeholder="Search appointments by pet name, type, or breed..."
+              placeholder="Search bookings by pet name, type, or breed..."
               className="w-full md:w-1/3 p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
               value={searchTerm}
               onChange={(e) => {
@@ -158,39 +176,39 @@ export default function MyClinicPage() {
           </div>
 
           <div className="space-y-6">
-            {filteredClinic.length === 0 ? (
+            {paginatedHotelRes.length === 0 ? (
               <div className="text-center p-12 bg-white rounded-xl shadow-lg">
                 <div className="text-gray-400 mb-4">
-                  <Stethoscope size={48} className="mx-auto" />
+                  <Hotel size={48} className="mx-auto" />
                 </div>
                 <p className="text-lg text-gray-500 font-semibold">
                   {searchTerm
-                    ? "No clinic appointments found matching your search."
-                    : "You have no clinic appointments."}
+                    ? "No hotel bookings found matching your search."
+                    : "You have no pet hotel bookings."}
                 </p>
                 {!searchTerm && (
-                  <Link href="/forms/clinic" className="mt-4 inline-flex items-center text-sky-600 hover:text-sky-800 transition-colors font-medium">
+                  <Link href="/forms/hotel" className="mt-4 inline-flex items-center text-sky-600 hover:text-sky-800 transition-colors font-medium">
                     <Button className="mt-4">
-                      Book Your First Clinic Appointment
+                      Book Your First Pet Hotel Stay
                     </Button>
                   </Link>
                 )}
               </div>
             ) : (
-              paginatedClinic.map((clinic) => (
-                <Card key={clinic.id} className="shadow-lg rounded-xl overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              paginatedHotelRes.map((hotelres) => (
+                <Card key={hotelres.id} className="shadow-lg rounded-xl overflow-hidden hover:shadow-xl transition-shadow duration-300">
                   <CardContent className="p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 mb-4 border-gray-200">
                       <div>
                         <h3 className="text-xl font-bold text-gray-900">
-                          {clinic.petName}'s Appointment
+                          {hotelres.petName}'s Hotel Stay
                         </h3>
                         <p className="text-sm text-gray-500 mt-1">
-                          Booking ID: #{clinic.id.slice(0, 8)}
+                          Booking ID: #{hotelres.id.slice(0, 8)}
                         </p>
                       </div>
                       <div className="mt-3 sm:mt-0">
-                        {getStatusBadge(clinic.status)}
+                        {getStatusBadge(hotelres.status)}
                       </div>
                     </div>
 
@@ -199,25 +217,25 @@ export default function MyClinicPage() {
                         <div className="flex items-center gap-2 text-gray-700">
                           <PawPrint size={18} />
                           <p className="font-semibold">Pet Name:</p>
-                          <span className="font-normal">{clinic.petName}</span>
+                          <span className="font-normal">{hotelres.petName}</span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-700 mt-2">
                           <PawPrint size={18} />
                           <p className="font-semibold">Type/Breed:</p>
-                          <span className="font-normal">{`${clinic.petType} / ${clinic.petBreed}`}</span>
+                          <span className="font-normal">{`${hotelres.petType} / ${hotelres.petBreed}`}</span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-700 mt-2">
                           <PawPrint size={18} />
                           <p className="font-semibold">Age:</p>
-                          <span className="font-normal">{clinic.petAge}</span>
+                          <span className="font-normal">{hotelres.petAge}</span>
                         </div>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 text-gray-700">
                           <Calendar size={18} />
-                          <p className="font-semibold">Appointment Date:</p>
+                          <p className="font-semibold">Check-in Date:</p>
                           <span className="font-normal">
-                            {new Date(clinic.appointmentDate).toLocaleDateString('en-US', {
+                            {new Date(hotelres.appointmentDate).toLocaleDateString('en-US', {
                               weekday: "long",
                               year: 'numeric',
                               month: 'long',
@@ -225,25 +243,26 @@ export default function MyClinicPage() {
                             })}
                           </span>
                         </div>
-                        {clinic.description && (
-                          <div className="flex items-start gap-2 text-gray-700 mt-2">
-                            <Stethoscope size={18} className="mt-1 flex-shrink-0" />
-                            <div className="flex-grow">
-                              <p className="font-semibold">Health Concern:</p>
-                              <span className="text-sm text-gray-600 mt-1 block">{clinic.description}</span>
-                            </div>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 text-gray-700 mt-2">
+                          <Clock size={18} />
+                          <p className="font-semibold">Duration:</p>
+                          <span className="font-normal">{hotelres.amountDays} days</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-700 mt-2">
+                          <Hotel size={18} />
+                          <p className="font-semibold">Hotel Name:</p>
+                          <span className="font-normal">{hotelres.hotel?.name}</span>
+                        </div>
                       </div>
                     </div>
 
                     <div className="mt-6 pt-4 flex flex-col sm:flex-row justify-end gap-2 border-t border-gray-200">
-                      {clinic.status === "Ready" ? (
+                      {hotelres.status === "Ready" ? (
                         <>
                           <Button variant="secondary" className="w-full sm:w-auto">Reschedule</Button>
                           <Button variant="destructive" className="w-full sm:w-auto">Cancel</Button>
                         </>
-                      ) : clinic.status === "Completed" ? (
+                      ) : hotelres.status === "Completed" ? (
                         <Button variant="outline" className="w-full sm:w-auto">Book Again</Button>
                       ) : (
                         <span className="text-gray-500 text-sm italic">
@@ -288,6 +307,15 @@ export default function MyClinicPage() {
             </div>
           )}
         </div>
+        <select
+  value={itemsPerPage}
+  onChange={(e) => setItemsPerPage(Number(e.target.value))}
+>
+  <option value={3}>3 / page</option>
+  <option value={5}>5 / page</option>
+  <option value={10}>10 / page</option>
+  <option value={filteredHotelRes.length}>All</option>
+</select>
       </div>
     </>
   );

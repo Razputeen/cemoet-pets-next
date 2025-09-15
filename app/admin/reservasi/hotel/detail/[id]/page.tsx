@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Card, CardContent } from "#/components/ui/card";
-import { Button } from "#/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import Navbar from "#/app/components/Navbar/page";
+import Navbar from "@/app/components/Navbar/page";
 import { useParams, useRouter } from "next/navigation";
 
 type Clinic = {
